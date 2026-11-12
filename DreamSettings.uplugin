@@ -1,0 +1,23 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "0.1.0",
+	"FriendlyName": "DreamSettings",
+	"Description": "Real implementations of a game's settings - display, graphics, audio, controls, accessibility, language - over UE's GameUserSettings, meant to be driven by DreamGUI settings pages.",
+	"Category": "UI",
+	"CanContainContent": true,
+	"Installed": false,
+	"Plugins": [
+		{
+			"Name": "DreamGUI",
+			"Enabled": true
+		}
+	],
+	"Modules": [
+		{
+			"Name": "DreamSettings",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}

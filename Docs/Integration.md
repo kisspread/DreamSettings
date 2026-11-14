@@ -509,9 +509,10 @@ lifetime and close callback. Replacing a layout never changes providers or saved
 
 `VisibleCategories` and `InitialCategory` restrict a page to part of the catalogue. An empty list
 keeps every registry category; a non-empty list shows only those tabs in that order, which is how a
-host embeds, for example, just display and audio in a pause menu. Category shortcuts cycle within the
-restricted list, and the presenter falls back to the first visible tab when the initial one is not
-present. Restriction is presentation only: settings in hidden tabs still load, apply and save, and
+host embeds, for example, just display and audio in a pause menu. A restricted page always opens at
+`InitialCategory` (or the first visible tab) rather than the player's remembered last visit, so an
+embedded page starts where its host placed it. Category shortcuts cycle within the restricted list.
+Restriction is presentation only: settings in hidden tabs still load, apply and save, and
 another page without a restriction shows them normally. A single-category embed still includes the
 page header and navigation chrome; replacing that layout is the `ScreenClass` path.
 
@@ -648,3 +649,4 @@ key capture, modal dialogs and busy/dirty states prevent launch. Button and shor
 calls `ConfirmGameBenchmarkLaunch`; Back calls `CancelGameBenchmark`. Custom themes should include
 the confirmation scope, font preparation behaviour and the existing action guards as the bundled
 pages do. The confirmation's captions are prepared before its cover retires.
+

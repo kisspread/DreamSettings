@@ -262,9 +262,10 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 		NewCategories = MoveTemp(Restricted);
 	}
 	DREAM_VM_SET(Categories, NewCategories);
+	// A restricted page opens at the host's chosen tab; a full page may resume the player's last visit.
 	const FName Home = NewCategories.ContainsByPredicate([&](const auto& C){ return C->Id==InitialCategory; })
 		? InitialCategory : (NewCategories.IsEmpty() ? NAME_None : NewCategories[0]->Id);
-	const FName Previous = NavigationMemory.IsValid() ? NavigationMemory->Category : Home;
+	const FName Previous = NavigationMemory.IsValid() && VisibleCategories.IsEmpty() ? NavigationMemory->Category : Home;
 	SelectCategory(Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Previous; }) ? Previous : Home);
 	Refresh();
 	return true;

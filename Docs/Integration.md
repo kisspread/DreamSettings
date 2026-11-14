@@ -73,6 +73,13 @@ and parsing, `AudioSample` for the audition tone, `SubtitleSample` for the subti
 setting that sets these flags gets the same controls as the plugin's own rows. Definitions without
 flags fall back to the built-in ID and category checks, so existing catalogues behave unchanged.
 
+`FDreamSettingCategory::Content` does the same for page capabilities. `DisplayInformation` shows the
+effective resolution/mode block, `ScenePreview` offers the live scene, `ColourSamples` shows the
+colour-vision swatches and `GameBenchmark` hosts the benchmark action. The built-in Display, Graphics
+and Accessibility tabs receive these flags automatically, so an unmodified catalogue is unchanged;
+a host tab opts in through `RegisterCategory` or `OverrideCategory`. Category identity therefore
+never decides behaviour for a host that names its tabs itself.
+
 `FDreamSettingsRegistry::Register` accepts a stable ID, localized label/description, kind, default,
 range, step, preview policy, dependencies and an `IDreamSettingProvider`. Register extensions before
 opening a session. `Validate` rejects duplicate IDs, missing dependencies and cycles.

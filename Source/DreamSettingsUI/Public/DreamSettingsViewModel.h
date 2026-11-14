@@ -204,6 +204,7 @@ private:
 	TArray<FName> VisibleCategories;
 	FName InitialCategory;
 	FText CategoryPresentation(FName Category) const;
+	EDreamSettingCategoryContent CategoryContent(FName Category) const;
     FDreamSettingsMenuShortcuts MenuShortcuts;
     FName ResetSetting;
     void RefreshMenuShortcutHint();

@@ -83,6 +83,21 @@ bool FDreamSettingsCatalogueOverrideTest::RunTest(const FString&)
     TArray<FName> Ordered;
     TestTrue(TEXT("Overridden catalogue still validates"), Registry->Validate(Ordered).IsOk());
     TestTrue(TEXT("Both definitions remain"), Ordered.Contains(FName(TEXT("Display.HDR"))));
+
+    // Page capabilities travel with the tab, so a host tab can offer the scene preview without being Graphics.
+    Registry->Register(CatalogueEntry(TEXT("Network.Mode"), TEXT("Network"), 900), InertProvider());
+    FDreamSettingsCatalogOverride Content;
+    Content.CategoryContent.Add(TEXT("Network"), EDreamSettingCategoryContent::ScenePreview);
+    TestTrue(TEXT("Set tab content"), ApplyDreamSettingsCatalogOverride(*Registry, Content).IsOk());
+    const auto Tabs = Registry->Categories();
+    const auto* Network = Tabs.FindByPredicate([&](const auto& C) { return C.Id == FName(TEXT("Network")); });
+    TestNotNull(TEXT("Host tab listed"), Network);
+    TestTrue(TEXT("Host tab opts into the scene preview"),
+        EnumHasAnyFlags(Network->Content, EDreamSettingCategoryContent::ScenePreview));
+    const auto* Display = Tabs.FindByPredicate([&](const auto& C) { return C.Id == FName(TEXT("Display")); });
+    TestTrue(TEXT("Display keeps its information panel"),
+        EnumHasAnyFlags(Display->Content, EDreamSettingCategoryContent::DisplayInformation));
+    TestFalse(TEXT("Rename did not add capabilities"), EnumHasAnyFlags(Display->Content, EDreamSettingCategoryContent::ColourSamples));
     return true;
 }
 #endif

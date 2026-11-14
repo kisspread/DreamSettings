@@ -22,6 +22,21 @@ enum class EDreamSettingPresentation : uint8
 };
 ENUM_CLASS_FLAGS(EDreamSettingPresentation)
 
+/** Page capabilities a tab opts into; a host category named Video can preview the scene without being called Graphics. */
+enum class EDreamSettingCategoryContent : uint8
+{
+	None = 0,
+	/** Shows the effective display information block above the rows. */
+	DisplayInformation = 1 << 0,
+	/** Offers the live scene behind the page, since the tab changes visible output. */
+	ScenePreview = 1 << 1,
+	/** Shows the colour-vision sample swatches beside the accessibility rows. */
+	ColourSamples = 1 << 2,
+	/** Hosts the gameplay benchmark action next to the graphics presets. */
+	GameBenchmark = 1 << 3,
+};
+ENUM_CLASS_FLAGS(EDreamSettingCategoryContent)
+
 struct DREAMSETTINGS_API FDreamSettingsResult
 {
 	EDreamSettingsError Code = EDreamSettingsError::None;
@@ -68,6 +83,7 @@ struct DREAMSETTINGS_API FDreamSettingCategory
 	FText Label;
 	FText Description;
 	int32 Order = 0;
+	EDreamSettingCategoryContent Content = EDreamSettingCategoryContent::None;
 };
 
 struct DREAMSETTINGS_API FDreamSettingDefinition
@@ -167,7 +183,8 @@ public:
 		const TOptional<FText>& Description, bool bHidden);
 	/** Replace a tab's label, description or order, creating the tab when only rows imply it. */
 	FDreamSettingsResult OverrideCategory(FName Id, const TOptional<FText>& Label,
-		const TOptional<FText>& Description, const TOptional<int32>& Order);
+		const TOptional<FText>& Description, const TOptional<int32>& Order,
+		const TOptional<EDreamSettingCategoryContent>& Content = {});
 private:
 	TMap<FName, FDreamSettingDefinition> Definitions;
 	TMap<FName, TSharedPtr<IDreamSettingProvider>> Providers;
@@ -184,6 +201,7 @@ struct DREAMSETTINGS_API FDreamSettingsCatalogOverride
 	TMap<FName, FText> SettingDescriptions;
 	TMap<FName, FText> CategoryLabels;
 	TMap<FName, int32> CategoryOrder;
+	TMap<FName, EDreamSettingCategoryContent> CategoryContent;
 };
 
 /** Applies every listed edit and returns the first failure; nothing is applied partially. */

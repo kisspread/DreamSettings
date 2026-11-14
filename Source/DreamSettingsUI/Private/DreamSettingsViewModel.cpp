@@ -309,6 +309,14 @@ FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
     return BuiltInCategoryLabel(Category);
 }
 
+EDreamSettingCategoryContent UDreamSettingsViewModel::CategoryContent(FName Category) const
+{
+    if (Session)
+        for (const auto& Known : Session->GetRegistry().Categories())
+            if (Known.Id == Category) return Known.Content;
+    return EDreamSettingCategoryContent::None;
+}
+
 void UDreamSettingsViewModel::ConfigureVisibleCategories(const TArray<FName>& InCategories, FName InInitialCategory)
 {
     VisibleCategories = InCategories;
@@ -329,8 +337,9 @@ void UDreamSettingsViewModel::SelectCategory(FName Category)
     const bool NewText=Rows!=Selected || bInputGroupingDirty; bInputGroupingDirty=false;
     DREAM_VM_SET(Rows, Selected);
     DREAM_VM_SET(CategoryTitle, CategoryPresentation(Category));
-    DREAM_VM_SET(ShowColourSamples,Category==TEXT("Accessibility"));
-    DREAM_VM_SET(ShowDisplayInformation,Category==TEXT("Display"));
+    const EDreamSettingCategoryContent Content=CategoryContent(Category);
+    DREAM_VM_SET(ShowColourSamples,EnumHasAnyFlags(Content,EDreamSettingCategoryContent::ColourSamples));
+    DREAM_VM_SET(ShowDisplayInformation,EnumHasAnyFlags(Content,EDreamSettingCategoryContent::DisplayInformation));
     RefreshGameBenchmark();
     RefreshScenePreview();
     DetailsSetting=Selected.IsEmpty() ? NAME_None : Selected[0]->GetSettingId();
@@ -386,8 +395,8 @@ void UDreamSettingsViewModel::ConfigureScenePreview(bool Allowed,bool AutomaticF
 }
 void UDreamSettingsViewModel::RefreshScenePreview()
 {
-    const bool Graphics=CurrentCategory==TEXT("Graphics");
-    DREAM_VM_SET(ScenePreviewAvailable,Ready && bAllowScenePreview && (Graphics || CurrentCategory==TEXT("Display")));
+    const bool Graphics=EnumHasAnyFlags(CategoryContent(CurrentCategory),EDreamSettingCategoryContent::ScenePreview);
+    DREAM_VM_SET(ScenePreviewAvailable,Ready && bAllowScenePreview && Graphics);
     const bool Requested=ScenePreviewOverride.Get(bAutomaticGraphicsPreview && Graphics);
     // Modal and loading surfaces always regain an opaque backdrop. The user's
     // current-page choice resumes after the modal without touching settings.
@@ -587,7 +596,8 @@ void UDreamSettingsViewModel::RefreshGameBenchmark()
     // A configured dedicated input is available throughout the menu, like the
     // legacy benchmark footer. Without shortcuts, the action belongs to Graphics.
     const bool Dedicated=System && System->GetGameBenchmark(Player) && !GameBenchmarkKeys.IsEmpty();
-    DREAM_VM_SET(ShowGameBenchmark,Ready && bEnableGameBenchmark && (CurrentCategory==TEXT("Graphics") || Dedicated));
+    DREAM_VM_SET(ShowGameBenchmark,Ready && bEnableGameBenchmark &&
+        (EnumHasAnyFlags(CategoryContent(CurrentCategory),EDreamSettingCategoryContent::GameBenchmark) || Dedicated));
     auto Result=System ? System->GameBenchmarkAvailability(Player) : FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable,LOCTEXT("NoGameBenchmarkUI","This game has not provided a gameplay benchmark."));
     if (Result.IsOk() && Session && Session->IsDirty())
         Result=FDreamSettingsResult::Fail(EDreamSettingsError::Conflict,LOCTEXT("CleanBenchmarkUI","Apply or revert pending changes before running the game benchmark."));

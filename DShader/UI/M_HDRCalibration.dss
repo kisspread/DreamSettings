@@ -1,0 +1,31 @@
+#pragma material(Domain = UI, BlendMode = Translucent, ShadingModel = Unlit, Backend = Graph)
+/// @asset /DreamGUI/Materials/MF_DreamUI_Shade
+extern float4 DreamUIShade(float4 Tint);
+uniform float CandidateNits = 200.0;
+uniform float PaperWhiteNits = 200.0;
+uniform float PeakPattern = 0.0;
+// An inactive/SDR viewport must never present a misleading calibration pattern.
+uniform float OutputEnabled = 0.0;
+
+/// @custom
+float3 CalibrationPattern(float2 UV, float Candidate, float PaperWhite, float Peak, float Enabled)
+{
+    float2 P = abs(UV - 0.5);
+    float Patch = step(P.x, 0.22) * step(P.y, 0.35);
+    float Cross = max(step(P.x, 0.015) * step(P.y, 0.16), step(P.x, 0.09) * step(P.y, 0.025));
+    // A small peak patch avoids full-screen white; the cross is the PQ ceiling reference.
+    float PeakNits = Patch * lerp(clamp(Candidate, 100.0, 4000.0), 10000.0, Cross);
+    // Paper-white mode compares a white patch with 18% linear grey and near-black surroundings.
+    float Grey = lerp(0.01, 0.18, step(0.5, UV.x));
+    float WhiteNits = lerp(Grey, 1.0, Patch) * clamp(Candidate, 80.0, 400.0);
+    float Luminance = lerp(WhiteNits, PeakNits, step(0.5, Peak)) / max(PaperWhite, 1.0);
+    return float3(Luminance, Luminance, Luminance) * saturate(Enabled);
+}
+/// @name /DreamSettings/UI/M_HDRCalibration
+export void M_HDRCalibration(inout material m)
+{
+    float3 Colour = CalibrationPattern(UE.TexCoord(Index = 0), CandidateNits, PaperWhiteNits, PeakPattern, OutputEnabled);
+    float4 Shaded = DreamUIShade(float4(Colour, 1.0));
+    m.EmissiveColor = Shaded.rgb;
+    m.Opacity = Shaded.a;
+}

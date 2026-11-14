@@ -7,7 +7,17 @@
 	"Category": "UI",
 	"CanContainContent": true,
 	"Installed": false,
+	"LocalizationTargets": [
+		{
+			"Name": "DreamSettings",
+			"LoadingPolicy": "Game"
+		}
+	],
 	"Plugins": [
+		{
+			"Name": "EnhancedInput",
+			"Enabled": true
+		},
 		{
 			"Name": "DreamGUI",
 			"Enabled": true
@@ -16,6 +26,11 @@
 	"Modules": [
 		{
 			"Name": "DreamSettings",
+			"Type": "Runtime",
+			"LoadingPhase": "PostConfigInit"
+		},
+		{
+			"Name": "DreamSettingsUI",
 			"Type": "Runtime",
 			"LoadingPhase": "Default"
 		}

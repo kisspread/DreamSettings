@@ -1,0 +1,39 @@
+class /DreamSettings/UI/WBP_DreamSubtitles
+
+viewmodels {
+    /Script/DreamSettingsUI.DreamSettingsSubtitleViewModel Subtitles = new
+}
+
+Widget Root {
+    AnchorData.AnchorMin = (0, 0)
+    AnchorData.AnchorMax = (1, 1)
+    AnchorData.SizeDelta = (0, 0)
+    if Subtitles.HasText {
+        Widget SubtitleRegion {
+            AnchorData.AnchorMin = (0.1, 0)
+            AnchorData.AnchorMax = (0.9, 1)
+            AnchorData.Pivot = (0.5, 0)
+            AnchorData.AnchoredPosition = (0, 36)
+            AnchorData.SizeDelta = (0, -72)
+            + Overlay {}
+            SizeBox SubtitleBand {
+                + /Script/DreamSettingsUI.DreamSettingsSubtitleSizing { MinimumSize <- Subtitles.BandSize }
+                @slot { HorizontalAlignment = Fill; VerticalAlignment = Bottom }
+                Widget SubtitleFrame {
+                    + Overlay {}
+                    Image Backdrop { Brush.TintColor = #05090DE8; bRaycastTarget = false; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                    Text Caption {
+                        Text <- Subtitles.Caption
+                        FontSize <- Subtitles.FontSize
+                        Color = #F2F4F8
+                        bRaycastTarget = false
+                        HAlign = Center
+                        bAutoWrapText = true
+                        Margin = (20, 12, 20, 12)
+                        @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill }
+                    }
+                }
+            }
+        }
+    }
+}

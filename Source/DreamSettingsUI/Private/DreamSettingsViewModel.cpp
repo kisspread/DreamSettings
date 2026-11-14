@@ -461,6 +461,33 @@ void UDreamSettingsViewModel::GroupInputRows(TArray<TObjectPtr<UDreamSettingRowV
 }
 void UDreamSettingsViewModel::SetPreparingText(bool Value)
 { if (PreparingText!=Value) { DREAM_VM_SET(PreparingText,Value); Refresh(); } }
+
+FString UDreamSettingsViewModel::GetCataloguePreparationText() const
+{
+    TArray<FString> Texts;
+    auto Add=[&](const FText& Text) { if (!Text.IsEmpty()) Texts.AddUnique(Text.ToString()); };
+    if (!Session) return {};
+    for (const auto& Category:Categories) Add(Category->Label);
+    Add(LOCTEXT("OtherInputBindings","Other bindings"));
+    for (const auto& Row:AllRows)
+    {
+        const auto* Definition=Session->GetRegistry().Find(Row->GetSettingId());
+        if (!Definition || !Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Definition->Category; })) continue;
+        Add(Definition->Label); Add(Definition->Description); Add(Definition->InputCategoryLabel);
+        if (Definition->DynamicDescription) Add(Definition->DynamicDescription(Session->GetPending()));
+        Add(Row->Description); Add(Row->ValueText); Add(Row->DefaultValueText); Add(Row->ResetHint);
+        Add(Row->SampleLabel); Add(Row->HDRInstructions);
+        for (const auto& Option:Definition->GetOptions()) Add(Option.Label);
+        for (const auto& Context:Definition->InputContexts)
+        {
+            const auto* Override=InputContextLabels.Find(Context.Path);
+            Add(Override && !Override->IsEmpty() ? *Override : Context.Label);
+        }
+    }
+    // Digits and punctuation used by numeric edits, percentages, and joined input-group labels.
+    Texts.Add(TEXT("0123456789.,+-/%"));
+    return FString::Join(Texts,TEXT("\n"));
+}
 void UDreamSettingsViewModel::ConfigureMenuShortcuts(const FDreamSettingsMenuShortcuts& Value)
 {
     MenuShortcuts=Value;

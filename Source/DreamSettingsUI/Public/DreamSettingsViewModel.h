@@ -106,6 +106,8 @@ public:
 	FName GetCurrentCategory() const { return CurrentCategory; }
 	UDreamSettingsNavigationMemory* GetNavigationMemory() const { return NavigationMemory.Get(); }
 	void SetPreparingText(bool Value);
+	/** Localized visible catalogue text for asynchronous font preparation; never changes the selected tab. */
+	FString GetCataloguePreparationText() const;
 	UPROPERTY(BlueprintReadOnly,FieldNotify,Category="Settings") bool PreparingText=false;
 	UPROPERTY(BlueprintReadOnly,FieldNotify,Category="Settings") TObjectPtr<UDreamSettingsSubtitleViewModel> Subtitles;
 	void PreviewSubtitles();

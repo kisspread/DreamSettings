@@ -657,3 +657,11 @@ calls `ConfirmGameBenchmarkLaunch`; Back calls `CancelGameBenchmark`. Custom the
 the confirmation scope, font preparation behaviour and the existing action guards as the bundled
 pages do. The confirmation's captions are prepared before its cover retires.
 
+
+## Font preparation and category changes
+
+The bundled pages attach `UDreamSettingsTextPreparation`. On first open and culture changes it prepares the visible catalogue's labels, values, options, descriptions and input-group text using the page's real typography. It runs DreamGUI's layout and paint pipeline into temporary geometry, including small-text coverage glyphs, and waits for asynchronous glyph work and upload frames before releasing the initial cover. It does not change the selected category or settings values while preparing.
+
+Once prepared, ordinary category changes remain interactive and do not show the full-page loading cover. Details and confirmation panels still prepare newly presented content through their existing events.
+
+Custom pages should keep typography templates available in their widget tree. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` on the preparation component to retain per-category preparation until those fonts can be prepared in advance. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.

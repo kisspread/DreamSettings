@@ -178,9 +178,9 @@ public:
 	const FDreamSettingDefinition* Find(FName Id) const;
 	TSharedPtr<IDreamSettingProvider> Provider(FName Id) const { return Providers.FindRef(Id); }
 	const TMap<FName, FDreamSettingDefinition>& All() const { return Definitions; }
-	/** Replace label, description or hidden state for one registered setting. */
+	/** Replace label, description or visibility for one registered setting. Unset fields keep their value. */
 	FDreamSettingsResult OverrideDefinition(FName Id, const TOptional<FText>& Label,
-		const TOptional<FText>& Description, bool bHidden);
+		const TOptional<FText>& Description, const TOptional<bool>& bHidden = {});
 	/** Replace a tab's label, description or order, creating the tab when only rows imply it. */
 	FDreamSettingsResult OverrideCategory(FName Id, const TOptional<FText>& Label,
 		const TOptional<FText>& Description, const TOptional<int32>& Order,
@@ -197,6 +197,8 @@ private:
 struct DREAMSETTINGS_API FDreamSettingsCatalogOverride
 {
 	TSet<FName> HiddenSettings;
+	/** Explicit visibility, including showing a built-in entry again. Takes precedence over HiddenSettings. */
+	TMap<FName, bool> SettingVisibility;
 	TMap<FName, FText> SettingLabels;
 	TMap<FName, FText> SettingDescriptions;
 	TMap<FName, FText> CategoryLabels;

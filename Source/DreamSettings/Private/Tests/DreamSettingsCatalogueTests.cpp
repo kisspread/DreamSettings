@@ -5,6 +5,12 @@
 
 namespace
 {
+    struct FCatalogueStore : IDreamSettingsStore
+    {
+        FDreamSettingsValues Saved;
+        FDreamSettingsResult Load(FDreamSettingsValues& Out) override { Out = Saved; return {}; }
+        FDreamSettingsResult Save(const FDreamSettingsValues& In) override { Saved = In; return {}; }
+    };
     FDreamSettingDefinition CatalogueEntry(FName Id, FName Category, int32 Order)
     {
         FDreamSettingDefinition D;
@@ -98,6 +104,31 @@ bool FDreamSettingsCatalogueOverrideTest::RunTest(const FString&)
     TestTrue(TEXT("Display keeps its information panel"),
         EnumHasAnyFlags(Display->Content, EDreamSettingCategoryContent::DisplayInformation));
     TestFalse(TEXT("Rename did not add capabilities"), EnumHasAnyFlags(Display->Content, EDreamSettingCategoryContent::ColourSamples));
+
+    // A session opened after the edit sees the same catalogue, and a hidden row never reaches the page.
+    FDreamSettingsValues Values;
+    Values.Add(TEXT("Display.VSync"), 0); Values.Add(TEXT("Display.HDR"), 0);
+    auto Live = MakeShared<FDreamSettingsRegistry>();
+    auto AddLive = [&](FName Id, FName Category, int32 Order, TSharedPtr<IDreamSettingProvider> Provider)
+    {
+        FDreamSettingDefinition D = CatalogueEntry(Id, Category, Order);
+        Live->Register(D, Provider);
+    };
+    AddLive(TEXT("Display.VSync"), TEXT("Display"), 10, MakeShared<FDreamCallbackSettingsProvider>(
+        [&Values](FDreamSettingValue& Out) { Out = Values.FindChecked(TEXT("Display.VSync")); return FDreamSettingsResult{}; },
+        [&Values](const FDreamSettingValue& In) { Values.Add(TEXT("Display.VSync"), In); return FDreamSettingsResult{}; }));
+    AddLive(TEXT("Display.HDR"), TEXT("Display"), 20, MakeShared<FDreamCallbackSettingsProvider>(
+        [&Values](FDreamSettingValue& Out) { Out = Values.FindChecked(TEXT("Display.HDR")); return FDreamSettingsResult{}; },
+        [&Values](const FDreamSettingValue& In) { Values.Add(TEXT("Display.HDR"), In); return FDreamSettingsResult{}; }));
+    FDreamSettingsCatalogOverride SessionOverride;
+    SessionOverride.HiddenSettings.Add(TEXT("Display.VSync"));
+    TestTrue(TEXT("Override live catalogue"), ApplyDreamSettingsCatalogOverride(*Live, SessionOverride).IsOk());
+    FDreamSettingsSession Session(Live, MakeShared<FCatalogueStore>());
+    TestTrue(TEXT("Session opens on the edited catalogue"), Session.Open().IsOk());
+    TestTrue(TEXT("Hidden setting still has a value"), Session.GetPending().Contains(FName(TEXT("Display.VSync"))));
+    TestTrue(TEXT("Hidden setting still stages"), Session.Stage(TEXT("Display.VSync"), 1).IsOk());
+    TestTrue(TEXT("Hidden setting still applies"), Session.Apply().IsOk());
+    Session.Close();
     return true;
 }
 #endif

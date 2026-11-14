@@ -123,7 +123,7 @@ const FDreamSettingDefinition* FDreamSettingsRegistry::Find(FName Id) const
     return Definitions.Find(Id);
 }
 FDreamSettingsResult FDreamSettingsRegistry::OverrideDefinition(FName Id, const TOptional<FText>& Label,
-    const TOptional<FText>& Description, bool bHidden)
+    const TOptional<FText>& Description, const TOptional<bool>& bHidden)
 {
     const FDreamSettingDefinition* Base = Definitions.Find(Id);
     if (!Base) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
@@ -136,7 +136,7 @@ FDreamSettingsResult FDreamSettingsRegistry::OverrideDefinition(FName Id, const 
         Target.Label = *Label;
     }
     if (Description.IsSet()) Target.Description = *Description;
-    if (bHidden) Target.bHidden = true;
+    if (bHidden.IsSet()) Target.bHidden = *bHidden;
     return {};
 }
 FDreamSettingsResult FDreamSettingsRegistry::OverrideCategory(FName Id, const TOptional<FText>& Label,
@@ -175,6 +175,9 @@ FDreamSettingsResult ApplyDreamSettingsCatalogOverride(FDreamSettingsRegistry& R
     for (const auto& Pair : Override.SettingDescriptions)
         if (!Registry.Find(Pair.Key)) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
             FText::Format(LOCTEXT("OverrideDescription", "Cannot describe unknown setting {0}."), FText::FromName(Pair.Key)));
+    for (const auto& Pair : Override.SettingVisibility)
+        if (!Registry.Find(Pair.Key)) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            FText::Format(LOCTEXT("OverrideVisibility", "Cannot change visibility of unknown setting {0}."), FText::FromName(Pair.Key)));
     const TArray<FDreamSettingCategory> Existing = Registry.Categories();
     for (const auto& Pair : Override.CategoryLabels)
         if (Pair.Value.IsEmpty() || !Existing.ContainsByPredicate([&](const auto& C) { return C.Id == Pair.Key; }))
@@ -195,12 +198,17 @@ FDreamSettingsResult ApplyDreamSettingsCatalogOverride(FDreamSettingsRegistry& R
     }
     for (const auto& Pair : Override.SettingLabels)
     {
-        const auto Result = Registry.OverrideDefinition(Pair.Key, Pair.Value, {}, false);
+        const auto Result = Registry.OverrideDefinition(Pair.Key, Pair.Value, {}, {});
         if (!Result.IsOk()) return Result;
     }
     for (const auto& Pair : Override.SettingDescriptions)
     {
-        const auto Result = Registry.OverrideDefinition(Pair.Key, {}, Pair.Value, false);
+        const auto Result = Registry.OverrideDefinition(Pair.Key, {}, Pair.Value, {});
+        if (!Result.IsOk()) return Result;
+    }
+    for (const auto& Pair : Override.SettingVisibility)
+    {
+        const auto Result = Registry.OverrideDefinition(Pair.Key, {}, {}, Pair.Value);
         if (!Result.IsOk()) return Result;
     }
     for (const auto& Pair : Override.CategoryLabels)

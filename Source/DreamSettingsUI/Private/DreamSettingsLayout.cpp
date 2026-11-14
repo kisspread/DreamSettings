@@ -17,6 +17,7 @@ void UDreamSettingsLayout::ConfigureViewModel(UDreamSettingsViewModel* Presenter
         Presenter->ConfigureDescriptionAutoScroll(bAutoScrollDescriptions);
         Presenter->ConfigureInputGrouping(InputGrouping,InputContextLabels);
         Presenter->ConfigureMenuShortcuts(MenuShortcuts);
+        Presenter->ConfigureVisibleCategories(VisibleCategories,InitialCategory);
     }
 }
 

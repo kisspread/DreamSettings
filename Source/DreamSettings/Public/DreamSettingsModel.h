@@ -5,6 +5,23 @@
 enum class EDreamSettingKind : uint8 { Toggle, Scalar, Choice, Key };
 enum class EDreamSettingsError : uint8 { None, InvalidDefinition, InvalidValue, Unavailable, Conflict, Backend, Storage, Rollback, Pending };
 
+/** Row presentation the definition asks for; providers and saved values never depend on it. */
+enum class EDreamSettingPresentation : uint8
+{
+	None = 0,
+	/** Scalar shown as a percentage and parsed as one. Audio volumes and interface scale use it. */
+	Percent = 1 << 0,
+	/** Scalar offers the short audition tone through its own audio route. */
+	AudioSample = 1 << 1,
+	/** Offers the subtitle style preview instead of an audio tone. */
+	SubtitleSample = 1 << 2,
+	/** Brightness calibration point that can drive the host's HDR pattern. */
+	HDRCalibration = 1 << 3,
+	/** Peak point of the calibration pair; it owns the bright patch rather than the paper white. */
+	HDRPeak = 1 << 4,
+};
+ENUM_CLASS_FLAGS(EDreamSettingPresentation)
+
 struct DREAMSETTINGS_API FDreamSettingsResult
 {
 	EDreamSettingsError Code = EDreamSettingsError::None;
@@ -44,12 +61,22 @@ struct DREAMSETTINGS_API FDreamSettingsInputContext
 	FText Label;
 };
 
+/** Tab metadata owned by the registry. A category needs no definition to exist. */
+struct DREAMSETTINGS_API FDreamSettingCategory
+{
+	FName Id;
+	FText Label;
+	FText Description;
+	int32 Order = 0;
+};
+
 struct DREAMSETTINGS_API FDreamSettingDefinition
 {
 	FName Id;
 	FName Category;
 	FText Label;
 	FText Description;
+	EDreamSettingPresentation Presentation = EDreamSettingPresentation::None;
 	FString InputCategoryId;
 	FText InputCategoryLabel;
 	TArray<FDreamSettingsInputContext> InputContexts;
@@ -126,14 +153,42 @@ class DREAMSETTINGS_API FDreamSettingsRegistry
 {
 public:
 	FDreamSettingsResult Register(FDreamSettingDefinition Definition, TSharedPtr<IDreamSettingProvider> Provider = nullptr);
+	/** Register a tab explicitly. Explicit metadata wins over a category inferred from its rows. */
+	FDreamSettingsResult RegisterCategory(FDreamSettingCategory Category);
+	/** Sorted tabs, including categories inferred from rows whose Category was never registered. */
+	TArray<FDreamSettingCategory> Categories() const;
 	FDreamSettingsResult Validate(TArray<FName>& OrderedIds) const;
-	const FDreamSettingDefinition* Find(FName Id) const { return Definitions.Find(Id); }
+	/** Returns the definition with host overrides applied; the stored copy is never mutated. */
+	const FDreamSettingDefinition* Find(FName Id) const;
 	TSharedPtr<IDreamSettingProvider> Provider(FName Id) const { return Providers.FindRef(Id); }
 	const TMap<FName, FDreamSettingDefinition>& All() const { return Definitions; }
+	/** Replace label, description or hidden state for one registered setting. */
+	FDreamSettingsResult OverrideDefinition(FName Id, const TOptional<FText>& Label,
+		const TOptional<FText>& Description, bool bHidden);
+	/** Replace a tab's label, description or order, creating the tab when only rows imply it. */
+	FDreamSettingsResult OverrideCategory(FName Id, const TOptional<FText>& Label,
+		const TOptional<FText>& Description, const TOptional<int32>& Order);
 private:
 	TMap<FName, FDreamSettingDefinition> Definitions;
 	TMap<FName, TSharedPtr<IDreamSettingProvider>> Providers;
+	TMap<FName, FDreamSettingCategory> ExplicitCategories;
+	TMap<FName, FDreamSettingDefinition> DefinitionOverrides;
+	TMap<FName, FDreamSettingCategory> CategoryOverrides;
 };
+
+/** Host edits to the finished catalogue. The provider behind a definition is never replaced. */
+struct DREAMSETTINGS_API FDreamSettingsCatalogOverride
+{
+	TSet<FName> HiddenSettings;
+	TMap<FName, FText> SettingLabels;
+	TMap<FName, FText> SettingDescriptions;
+	TMap<FName, FText> CategoryLabels;
+	TMap<FName, int32> CategoryOrder;
+};
+
+/** Applies every listed edit and returns the first failure; nothing is applied partially. */
+DREAMSETTINGS_API FDreamSettingsResult ApplyDreamSettingsCatalogOverride(FDreamSettingsRegistry& Registry,
+	const FDreamSettingsCatalogOverride& Override);
 
 /** One editing transaction. Owner grants an exclusive process-settings lease for its lifetime. */
 class DREAMSETTINGS_API FDreamSettingsSession

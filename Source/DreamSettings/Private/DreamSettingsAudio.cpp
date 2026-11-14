@@ -47,6 +47,7 @@ FDreamSettingsResult RegisterDreamAudioSettings(FDreamSettingsRegistry& Registry
         if (RouteResult.IsOk()) Used.Add(SoundClass);
         auto KeepAlive=MakeShared<TStrongObjectPtr<USoundClass>>(SoundClass);
         FDreamSettingDefinition D; D.Id=Channel.Key; D.Category=TEXT("Audio"); D.Label=Channel.Value;
+	D.Presentation=EDreamSettingPresentation::Percent|EDreamSettingPresentation::AudioSample;
         D.Description=LOCTEXT("ChannelVolumeDescription", "Preview this channel's volume. Apply to save, or Revert to restore the previous level.");
         D.Default=1; D.bPreview=true; D.Order=Order++;
         const auto Result=Registry.Register(D,MakeShared<FDreamCallbackSettingsProvider>(

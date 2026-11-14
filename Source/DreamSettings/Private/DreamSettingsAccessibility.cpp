@@ -110,6 +110,7 @@ FDreamSettingsResult RegisterDreamAccessibilitySettings(FDreamSettingsRegistry& 
         return {};
     };
     FDreamSettingDefinition Subtitles; Subtitles.Id=TEXT("Accessibility.Subtitles"); Subtitles.Category=TEXT("Accessibility"); Subtitles.Order=502;
+Subtitles.Presentation=EDreamSettingPresentation::SubtitleSample;
     Subtitles.Kind=EDreamSettingKind::Toggle; Subtitles.Default=1; Subtitles.Step=1; Subtitles.bPreview=true;
     Subtitles.Label=LOCTEXT("Subtitles","Subtitles");
     Subtitles.Description=LOCTEXT("SubtitlesHelp","Show dialogue and cinematic subtitles. Preview the change before applying it.");

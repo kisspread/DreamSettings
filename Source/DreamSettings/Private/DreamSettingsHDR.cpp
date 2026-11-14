@@ -135,12 +135,14 @@ TArray<FDreamSettingDefinition> DreamHDRDefinitions()
     Calibration.EditCondition=[](const FDreamSettingsValues& V) { return V.FindRef(EnableId).Number!=0 ? FDreamSettingsResult{} : HDRUnavailable(LOCTEXT("HDRConfirmFirst","Enable HDR and keep the display change before adjusting HDR brightness.")); };
     Out.Add(Calibration);
     FDreamSettingDefinition Peak; Peak.Id=PeakId; Peak.Category=Enable.Category; Peak.Order=62; Peak.Min=100; Peak.Max=4000; Peak.Step=10; Peak.Default=1000; Peak.bPreview=true;
+Peak.Presentation=EDreamSettingPresentation::HDRCalibration|EDreamSettingPresentation::HDRPeak;
     Peak.Label=LOCTEXT("HDRPeak","HDR peak brightness (nits)");
     Peak.Description=LOCTEXT("HDRPeakHelp","Set the maximum highlight brightness for your display when custom calibration is enabled.");
     Peak.Dependencies={EnableId,CalibrationId};
     Peak.EditCondition=[](const FDreamSettingsValues& V) { return V.FindRef(EnableId).Number!=0 && V.FindRef(CalibrationId).Number!=0 ? FDreamSettingsResult{} : HDRUnavailable(LOCTEXT("HDRCalibrationFirst","Enable HDR and custom peak brightness first.")); };
     Out.Add(Peak);
     FDreamSettingDefinition White; White.Id=WhiteId; White.Category=Enable.Category; White.Order=63; White.Min=80; White.Max=400; White.Step=1; White.Default=203; White.bPreview=true;
+White.Presentation=EDreamSettingPresentation::HDRCalibration;
     White.Label=LOCTEXT("HDRPaperWhite","HDR paper white (nits)");
     White.Description=LOCTEXT("HDRPaperWhiteHelp","Adjust the brightness of ordinary white surfaces. Peak brightness controls highlights separately.");
     White.Dependencies={EnableId}; White.EditCondition=Calibration.EditCondition; Out.Add(White);

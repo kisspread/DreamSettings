@@ -20,6 +20,13 @@ public:
 	virtual void Deinitialize() override;
 	TSharedPtr<FDreamSettingsSession> OpenSession(ULocalPlayer* Player, FDreamSettingsResult& OutResult);
 	TSharedPtr<FDreamSettingsRegistry> GetRegistry() const { return Registry; }
+	/**
+	 * Hide a built-in setting, or relabel/reorder it and its category. Intended for a project's
+	 * vendor-config plugin on GameInstance initialization, before the first settings page opens.
+	 * The provider is never replaced: this only removes presentation and adjusts displayed defaults' labels.
+	 */
+	FDreamSettingsResult ApplyCatalogOverride(const FDreamSettingsCatalogOverride& Override);
+	FDreamSettingsResult RegisterCategory(FDreamSettingCategory Category);
 	const FDreamSettingsResult& GetInitializationResult() const { return InitializationResult; }
 	FDreamSettingsResult RecommendGraphics(FDreamSettingsSession& Session);
 	void SetGameBenchmark(ULocalPlayer* Player,TSharedPtr<IDreamSettingsGameBenchmark> Launcher);

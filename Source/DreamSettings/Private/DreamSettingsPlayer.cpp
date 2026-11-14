@@ -95,10 +95,12 @@ TArray<FDreamSettingDefinition> UDreamSettingsPlayerSubsystem::PresentationDefin
     Motion.Description=LOCTEXT("ReducedMotionHelp","Use instant wheel and navigation scrolling, instant focus movement, and static loading indicators.");
     Out.Add(MoveTemp(Motion));
     FDreamSettingDefinition Scale; Scale.Id=TEXT("Accessibility.UIScale"); Scale.Category=TEXT("Accessibility"); Scale.Order=504;
+Scale.Presentation=EDreamSettingPresentation::Percent;
     Scale.Label=LOCTEXT("UIScale","Interface scale");
     Scale.Description=LOCTEXT("UIScaleHelp","Resize the interface. 1.00 is the standard size.");
     Scale.Min=.8; Scale.Max=1.25; Scale.Step=.05; Scale.Default=1; Scale.bPreview=true; Out.Add(MoveTemp(Scale));
     FDreamSettingDefinition Size; Size.Id=TEXT("Accessibility.SubtitleSize"); Size.Category=TEXT("Accessibility"); Size.Order=505;
+Size.Presentation=EDreamSettingPresentation::SubtitleSample;
     Size.Label=LOCTEXT("SubtitleSize","Subtitle text size");
     Size.Description=LOCTEXT("SubtitleSizeHelp","Change dialogue text size. Use Preview to check readability.");
     Size.Min=18; Size.Max=40; Size.Step=2; Size.Default=24; Size.bPreview=true; Out.Add(MoveTemp(Size));

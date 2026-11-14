@@ -37,6 +37,10 @@ public:
     UPROPERTY(EditAnywhere,Category="Settings|Game benchmark") bool bEnableGameBenchmarkInShipping=false;
     /** Empty disables dedicated input. Only unmodified, non-repeat presses are accepted. */
     UPROPERTY(EditAnywhere,Category="Settings|Game benchmark") TArray<FKey> GameBenchmarkKeys={EKeys::F8,EKeys::Gamepad_FaceButton_Top};
+    /** Empty shows every registry category. Otherwise the page embeds only these, in this order. */
+    UPROPERTY(EditAnywhere,Category="Settings|Categories") TArray<FName> VisibleCategories;
+    /** Tab selected on open when it is among the visible ones; empty selects the first. */
+    UPROPERTY(EditAnywhere,Category="Settings|Categories") FName InitialCategory;
     void ConfigureViewModel(UDreamSettingsViewModel* Presenter) const;
 
     /** Resolve before creating the screen, or preload the UI asset bundle through AssetManager.

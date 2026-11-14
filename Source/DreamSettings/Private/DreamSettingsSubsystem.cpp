@@ -190,6 +190,30 @@ void UDreamSettingsSubsystem::InitializeSettings()
 	if (!Recovery.IsEmpty()) InitializationResult = Store->Save(Recovery);
 }
 
+FDreamSettingsResult UDreamSettingsSubsystem::ApplyCatalogOverride(const FDreamSettingsCatalogOverride& Override)
+{
+	InitializeSettings();
+	if (!InitializationResult.IsOk()) return InitializationResult;
+	if (ActiveSession) return FDreamSettingsResult::Fail(EDreamSettingsError::Conflict,
+		LOCTEXT("OverrideWhileOpen", "Close the open settings page before changing the catalogue."));
+	const auto Result=ApplyDreamSettingsCatalogOverride(*Registry,Override);
+	if (!Result.IsOk()) return Result;
+	TArray<FName> Ordered;
+	return Registry->Validate(Ordered);
+}
+
+FDreamSettingsResult UDreamSettingsSubsystem::RegisterCategory(FDreamSettingCategory Category)
+{
+	InitializeSettings();
+	if (!InitializationResult.IsOk()) return InitializationResult;
+	if (ActiveSession) return FDreamSettingsResult::Fail(EDreamSettingsError::Conflict,
+		LOCTEXT("CategoryWhileOpen", "Close the open settings page before adding a category."));
+	const auto Result=Registry->RegisterCategory(MoveTemp(Category));
+	if (!Result.IsOk()) return Result;
+	TArray<FName> Ordered;
+	return Registry->Validate(Ordered);
+}
+
 TSharedPtr<FDreamSettingsSession> UDreamSettingsSubsystem::OpenSession(ULocalPlayer* Player, FDreamSettingsResult& OutResult)
 {
 	check(IsInGameThread());

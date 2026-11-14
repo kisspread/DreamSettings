@@ -74,6 +74,137 @@ FDreamSettingsResult FDreamSettingsRegistry::Register(FDreamSettingDefinition De
     Definitions.Add(Definition.Id, MoveTemp(Definition));
     return {};
 }
+FDreamSettingsResult FDreamSettingsRegistry::RegisterCategory(FDreamSettingCategory Category)
+{
+    if (Category.Id.IsNone() || Category.Label.IsEmpty())
+        return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition, LOCTEXT("Category", "A category needs an ID and a label."));
+    bool bAlreadyUsed = false;
+    for (const auto& Pair : Definitions) if (Pair.Value.Category == Category.Id) { bAlreadyUsed = true; break; }
+    if (ExplicitCategories.Contains(Category.Id) || bAlreadyUsed)
+        return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition, LOCTEXT("DuplicateCategory", "The category is already defined by settings or by an explicit registration."));
+    ExplicitCategories.Add(Category.Id, MoveTemp(Category));
+    return {};
+}
+TArray<FDreamSettingCategory> FDreamSettingsRegistry::Categories() const
+{
+    TMap<FName, FDreamSettingCategory> Result = ExplicitCategories;
+    for (const auto& Pair : Definitions)
+    {
+        const FName Id = Pair.Value.Category;
+        if (Id.IsNone() || Result.Contains(Id)) continue;
+        FDreamSettingCategory Category;
+        Category.Id = Id;
+        Category.Label = FText::FromName(Id);
+        Category.Order = MAX_int32;
+        Result.Add(Id, MoveTemp(Category));
+    }
+    for (const auto& Pair : CategoryOverrides) Result.Add(Pair.Key, Pair.Value);
+    // A category without explicit order sorts by its first row so registry-only hosts still get a stable tab order.
+    for (auto& Pair : Result)
+        if (!ExplicitCategories.Contains(Pair.Key) && !CategoryOverrides.Contains(Pair.Key))
+            for (const auto& Definition : Definitions)
+                if (Definition.Value.Category == Pair.Key)
+                    Pair.Value.Order = FMath::Min(Pair.Value.Order, Definition.Value.Order);
+    TArray<FDreamSettingCategory> Sorted;
+    Result.GenerateValueArray(Sorted);
+    Sorted.Sort([](const FDreamSettingCategory& A, const FDreamSettingCategory& B)
+    {
+        return A.Order == B.Order ? A.Id.LexicalLess(B.Id) : A.Order < B.Order;
+    });
+    return Sorted;
+}
+const FDreamSettingDefinition* FDreamSettingsRegistry::Find(FName Id) const
+{
+    if (const FDreamSettingDefinition* Override = DefinitionOverrides.Find(Id)) return Override;
+    return Definitions.Find(Id);
+}
+FDreamSettingsResult FDreamSettingsRegistry::OverrideDefinition(FName Id, const TOptional<FText>& Label,
+    const TOptional<FText>& Description, bool bHidden)
+{
+    const FDreamSettingDefinition* Base = Definitions.Find(Id);
+    if (!Base) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+        FText::Format(LOCTEXT("OverrideUnknown", "The catalogue has no setting {0}."), FText::FromName(Id)));
+    FDreamSettingDefinition& Target = DefinitionOverrides.FindOrAdd(Id, *Base);
+    if (Label.IsSet())
+    {
+        if (Label->IsEmpty()) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            LOCTEXT("OverrideEmptyLabel", "A setting label cannot be empty."));
+        Target.Label = *Label;
+    }
+    if (Description.IsSet()) Target.Description = *Description;
+    if (bHidden) Target.bHidden = true;
+    return {};
+}
+FDreamSettingsResult FDreamSettingsRegistry::OverrideCategory(FName Id, const TOptional<FText>& Label,
+    const TOptional<FText>& Description, const TOptional<int32>& Order)
+{
+    if (Id.IsNone()) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+        LOCTEXT("OverrideEmptyCategory", "A category override needs an ID."));
+    const TArray<FDreamSettingCategory> Known = Categories();
+    const FDreamSettingCategory* Base = Known.FindByPredicate([&](const auto& C) { return C.Id == Id; });
+    if (!Base) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+        FText::Format(LOCTEXT("OverrideCategory", "Cannot change unknown category {0}."), FText::FromName(Id)));
+    FDreamSettingCategory& Target = CategoryOverrides.FindOrAdd(Id, *Base);
+    if (Label.IsSet())
+    {
+        if (Label->IsEmpty()) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            LOCTEXT("OverrideEmptyCategoryLabel", "A category label cannot be empty."));
+        Target.Label = *Label;
+        ExplicitCategories.Add(Id, Target);
+    }
+    if (Description.IsSet()) Target.Description = *Description;
+    if (Order.IsSet()) Target.Order = *Order;
+    return {};
+}
+FDreamSettingsResult ApplyDreamSettingsCatalogOverride(FDreamSettingsRegistry& Registry,
+    const FDreamSettingsCatalogOverride& Override)
+{
+    // Validate the whole request before writing so a bad entry cannot leave a half-customized catalogue.
+    for (FName Id : Override.HiddenSettings)
+        if (!Registry.Find(Id)) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            FText::Format(LOCTEXT("OverrideUnknown", "The catalogue has no setting {0}."), FText::FromName(Id)));
+    for (const auto& Pair : Override.SettingLabels)
+        if (!Registry.Find(Pair.Key) || Pair.Value.IsEmpty()) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            FText::Format(LOCTEXT("OverrideLabel", "Cannot relabel unknown setting {0}."), FText::FromName(Pair.Key)));
+    for (const auto& Pair : Override.SettingDescriptions)
+        if (!Registry.Find(Pair.Key)) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+            FText::Format(LOCTEXT("OverrideDescription", "Cannot describe unknown setting {0}."), FText::FromName(Pair.Key)));
+    const TArray<FDreamSettingCategory> Existing = Registry.Categories();
+    for (const auto& Pair : Override.CategoryLabels)
+        if (Pair.Value.IsEmpty() || !Existing.ContainsByPredicate([&](const auto& C) { return C.Id == Pair.Key; }))
+            return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+                FText::Format(LOCTEXT("OverrideCategory", "Cannot relabel unknown category {0}."), FText::FromName(Pair.Key)));
+    for (const auto& Pair : Override.CategoryOrder)
+        if (!Existing.ContainsByPredicate([&](const auto& C) { return C.Id == Pair.Key; }))
+            return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+                FText::Format(LOCTEXT("OverrideCategoryOrder", "Cannot reorder unknown category {0}."), FText::FromName(Pair.Key)));
+    for (FName Id : Override.HiddenSettings)
+    {
+        const auto Result = Registry.OverrideDefinition(Id, {}, {}, true);
+        if (!Result.IsOk()) return Result;
+    }
+    for (const auto& Pair : Override.SettingLabels)
+    {
+        const auto Result = Registry.OverrideDefinition(Pair.Key, Pair.Value, {}, false);
+        if (!Result.IsOk()) return Result;
+    }
+    for (const auto& Pair : Override.SettingDescriptions)
+    {
+        const auto Result = Registry.OverrideDefinition(Pair.Key, {}, Pair.Value, false);
+        if (!Result.IsOk()) return Result;
+    }
+    for (const auto& Pair : Override.CategoryLabels)
+    {
+        const auto Result = Registry.OverrideCategory(Pair.Key, Pair.Value, {}, {});
+        if (!Result.IsOk()) return Result;
+    }
+    for (const auto& Pair : Override.CategoryOrder)
+    {
+        const auto Result = Registry.OverrideCategory(Pair.Key, {}, {}, Pair.Value);
+        if (!Result.IsOk()) return Result;
+    }
+    return {};
+}
 FDreamSettingsResult FDreamSettingsRegistry::Validate(TArray<FName>& OrderedIds) const
 {
     OrderedIds.Reset();

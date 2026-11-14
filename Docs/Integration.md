@@ -41,6 +41,38 @@ previous input mode and focus instead of copying that controller verbatim.
 
 ## Settings contracts
 
+### Categories and catalogue overrides
+
+Tabs are registry data, not UI strings. `RegisterCategory` adds a tab with its own localized label,
+description and order; a category used by a definition but never registered is still listed, sorted by
+its earliest row order and labelled with its raw ID. `Categories()` returns the merged, sorted list and
+is what the presenter renders. Prefer registering a category before its first definition so the label
+is translated rather than synthesized.
+
+After the built-in catalogue is created, a host may adjust it without replacing providers:
+
+```cpp
+FDreamSettingsCatalogOverride Override;
+Override.HiddenSettings.Add(TEXT("Graphics.UpscalingMethod"));
+Override.SettingLabels.Add(TEXT("Display.VSync"), LOCTEXT("VSync", "V-Sync"));
+Override.CategoryLabels.Add(TEXT("Display"), LOCTEXT("DisplayTab", "Video"));
+Override.CategoryOrder.Add(TEXT("Display"), 5);
+Subsystem->ApplyCatalogOverride(Override);
+```
+
+`ApplyDreamSettingsCatalogOverride` validates the whole request first; an unknown ID, an empty label
+or an unknown category rejects it without applying any entry. Overrides take effect through
+`Find`/`Categories` and therefore reach sessions, rows and validation, but they never touch a
+provider, a stored value or a schema. Hiding removes a row from the page; it does not disable the
+engine feature, so a host that must not expose HDR should also avoid saving it. Call the subsystem
+entry point before the first settings page opens; it refuses while a session is open.
+
+`EDreamSettingPresentation` declares how a row should be shown: `Percent` for percentage formatting
+and parsing, `AudioSample` for the audition tone, `SubtitleSample` for the subtitle preview,
+`HDRCalibration` for the brightness pattern and `HDRPeak` for the pair's peak point. A host-defined
+setting that sets these flags gets the same controls as the plugin's own rows. Definitions without
+flags fall back to the built-in ID and category checks, so existing catalogues behave unchanged.
+
 `FDreamSettingsRegistry::Register` accepts a stable ID, localized label/description, kind, default,
 range, step, preview policy, dependencies and an `IDreamSettingProvider`. Register extensions before
 opening a session. `Validate` rejects duplicate IDs, missing dependencies and cycles.
@@ -474,6 +506,20 @@ when necessary; a broken explicit reference returns an error and never silently 
 Set the resolved help and call `Layout->ConfigureViewModel(Presenter)` before `Initialize`, then bind the presenter as `Settings` on
 the selected DreamGUI widget. The host retains ownership of its screen canvas, input mode, session
 lifetime and close callback. Replacing a layout never changes providers or saved values.
+
+`VisibleCategories` and `InitialCategory` restrict a page to part of the catalogue. An empty list
+keeps every registry category; a non-empty list shows only those tabs in that order, which is how a
+host embeds, for example, just display and audio in a pause menu. Category shortcuts cycle within the
+restricted list, and the presenter falls back to the first visible tab when the initial one is not
+present. Restriction is presentation only: settings in hidden tabs still load, apply and save, and
+another page without a restriction shows them normally. A single-category embed still includes the
+page header and navigation chrome; replacing that layout is the `ScreenClass` path.
+
+Settings rows render from `for Row in Settings.Rows` inside the page DUI. DreamGUI components cannot
+currently take a view model as a prop and a `for` body only binds single-hop member paths, so a row
+cannot be extracted into a reusable `RowTemplate` component. Themes therefore repeat the row block
+and any row-level change must be made in each theme. Keep the row's focus anchor, control paths and
+the presenter's row view model intact when copying it.
 
 The DreamMenus host demonstrates a configurable `SettingsLayout` and a separate Warcraft layout
 under `/Game/UI/Warcraft3`. That host path is not a dependency of this plugin. Register layout assets

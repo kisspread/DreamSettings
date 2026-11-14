@@ -118,6 +118,8 @@ public:
 	bool AllowsDescriptionAutoScroll() const;
 	void ConfigureInputGrouping(EDreamSettingsInputGrouping Mode,const TMap<FSoftObjectPath,FText>& ContextLabels);
     void ConfigureMenuShortcuts(const FDreamSettingsMenuShortcuts& Value);
+    /** Restrict the tabs to these categories, in this order. Empty shows every registry category. */
+    void ConfigureVisibleCategories(const TArray<FName>& Categories,FName InitialCategory);
     bool HandleMenuShortcut(FKey Key,bool Repeat);
     UFUNCTION(BlueprintCallable,Category="Settings") void RequestResetOptions();
     UFUNCTION(BlueprintCallable,Category="Settings") void CancelResetOptions();
@@ -199,6 +201,9 @@ private:
 	EDreamSettingsInputGrouping InputGrouping=EDreamSettingsInputGrouping::DisplayCategory;
 	TMap<FSoftObjectPath,FText> InputContextLabels;
 	bool bInputGroupingDirty=false;
+	TArray<FName> VisibleCategories;
+	FName InitialCategory;
+	FText CategoryPresentation(FName Category) const;
     FDreamSettingsMenuShortcuts MenuShortcuts;
     FName ResetSetting;
     void RefreshMenuShortcutHint();

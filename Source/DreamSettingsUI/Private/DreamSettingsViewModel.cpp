@@ -39,7 +39,11 @@ namespace
         FNumberFormattingOptions Format; Format.SetMaximumFractionalDigits(6);
         return Percent ? FText::AsPercent(V.Number,&Format) : FText::AsNumber(V.Number,&Format);
     }
-    FText CategoryLabel(FName Id)
+    /**
+     * The registry owns tab metadata; these names only translate the categories this plugin ships so their
+     * existing msgctxt history keeps resolving. A host category arrives already labeled and never reaches here.
+     */
+    FText BuiltInCategoryLabel(FName Id)
     {
         if (Id == TEXT("Display")) return LOCTEXT("DisplayCategory", "Display");
         if (Id == TEXT("Graphics")) return LOCTEXT("GraphicsCategory", "Graphics");
@@ -51,6 +55,10 @@ namespace
         if (Id == TEXT("Accessibility")) return LOCTEXT("AccessibilityCategory", "Accessibility");
         if (Id == TEXT("Localization")) return LOCTEXT("LanguageCategory", "Language");
         return FText::FromName(Id);
+    }
+    FText ResolveCategoryLabel(const FDreamSettingCategory& Category)
+    {
+        return Category.Label.IsEmpty() ? BuiltInCategoryLabel(Category.Id) : Category.Label;
     }
 }
 void UDreamSettingRowViewModel::Initialize(TSharedPtr<FDreamSettingsSession> InSession, FName InId, UDreamSettingsViewModel* InOwner)
@@ -75,11 +83,18 @@ void UDreamSettingRowViewModel::Refresh()
     const auto* Family=S->GetPending().Find(TEXT("Input.GamepadIcons"));
     DREAM_VM_SET(IconFamily,Family && Family->bToken ? Family->Token : FString(TEXT("xbox")));
     if (IsKey) DREAM_VM_SET(SelectedKey,FKey(FName(*Value.Token)));
-    DREAM_VM_SET(HasAudioSample,D->Category==TEXT("Audio") && D->Kind==EDreamSettingKind::Scalar);
-    DREAM_VM_SET(HasSubtitleSample,Id==TEXT("Accessibility.Subtitles") || Id==TEXT("Accessibility.SubtitleSize"));
+    // Declared presentation wins; the ID checks are the fallback for definitions authored before the flags existed.
+    const bool bAudioSample=EnumHasAnyFlags(D->Presentation,EDreamSettingPresentation::AudioSample)
+        || (D->Presentation==EDreamSettingPresentation::None && D->Category==TEXT("Audio") && D->Kind==EDreamSettingKind::Scalar);
+    const bool bSubtitleSample=EnumHasAnyFlags(D->Presentation,EDreamSettingPresentation::SubtitleSample)
+        || (D->Presentation==EDreamSettingPresentation::None && (Id==TEXT("Accessibility.Subtitles") || Id==TEXT("Accessibility.SubtitleSize")));
+    DREAM_VM_SET(HasAudioSample,bAudioSample && !bSubtitleSample);
+    DREAM_VM_SET(HasSubtitleSample,bSubtitleSample);
     DREAM_VM_SET(HasSample,HasAudioSample || HasSubtitleSample);
-    DREAM_VM_SET(IsHDRPeak,Id==TEXT("Display.HDRPeakNits"));
-    DREAM_VM_SET(HasHDRPreview,Enabled && (IsHDRPeak || Id==TEXT("Display.HDRPaperWhite")));
+    const bool bHDRCalibration=EnumHasAnyFlags(D->Presentation,EDreamSettingPresentation::HDRCalibration)
+        || (D->Presentation==EDreamSettingPresentation::None && (Id==TEXT("Display.HDRPeakNits") || Id==TEXT("Display.HDRPaperWhite")));
+    DREAM_VM_SET(IsHDRPeak,EnumHasAnyFlags(D->Presentation,EDreamSettingPresentation::HDRPeak) || Id==TEXT("Display.HDRPeakNits"));
+    DREAM_VM_SET(HasHDRPreview,Enabled && bHDRCalibration);
     DREAM_VM_SET(HDRInstructions,IsHDRPeak
         ? LOCTEXT("HDRPeakInstructions","Increase peak brightness until the cross just blends into the bright patch. Display tone mapping can affect this comparison; use the display's rated peak if the cross never disappears. Apply saves the result; Revert restores your previous settings.")
         : LOCTEXT("HDRWhiteInstructions","Adjust until the white patch feels comfortable for ordinary surfaces and text. The surrounding grey stays proportional to white. Peak highlights are adjusted separately. Apply saves the result; Revert restores your previous settings."));
@@ -104,7 +119,7 @@ void UDreamSettingRowViewModel::Refresh()
     else
     {
         FNumberFormattingOptions Format; Format.SetMaximumFractionalDigits(2);
-        Text = HasAudioSample ? FText::AsPercent(Value.Number) : FText::AsNumber(Value.Number, &Format);
+        Text = NumberDisplayScale()==100 ? FText::AsPercent(Value.Number) : FText::AsNumber(Value.Number, &Format);
     }
     DREAM_VM_SET(ValueText, Text);
     DREAM_VM_SET(DefaultValueText,DefaultLabel(*D,NumberDisplayScale()==100));
@@ -119,7 +134,12 @@ void UDreamSettingRowViewModel::SetNumber(float Value)
     }
 }
 double UDreamSettingRowViewModel::NumberDisplayScale() const
-{ return HasAudioSample || Id==TEXT("Accessibility.UIScale") ? 100.0 : 1.0; }
+{
+    if (auto S=Session.Pin()) if (const auto* D=S->GetRegistry().Find(Id))
+        return EnumHasAnyFlags(D->Presentation,EDreamSettingPresentation::Percent)
+            || (D->Presentation==EDreamSettingPresentation::None && (HasAudioSample || Id==TEXT("Accessibility.UIScale"))) ? 100.0 : 1.0;
+    return HasAudioSample || Id==TEXT("Accessibility.UIScale") ? 100.0 : 1.0;
+}
 
 void UDreamSettingRowViewModel::CommitNumberText(const FString& Input)
 {
@@ -228,13 +248,24 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 		const FName Category = Session->GetRegistry().Find(Id)->Category;
 		if (!NewCategories.ContainsByPredicate([&](const auto& C) { return C->Id == Category; }))
 		{
-			auto* C = NewObject<UDreamSettingsCategoryViewModel>(this); C->Id = Category; C->Owner = this; C->Label = CategoryLabel(Category);
+			auto* C = NewObject<UDreamSettingsCategoryViewModel>(this); C->Id = Category; C->Owner = this; C->Label = CategoryPresentation(Category);
 			NewCategories.Add(C);
 		}
 	}
+	// A host that restricts the page keeps only its categories, in the host's order, after dropping empty ones.
+	if (!VisibleCategories.IsEmpty())
+	{
+		TArray<TObjectPtr<UDreamSettingsCategoryViewModel>> Restricted;
+		for (FName Allowed : VisibleCategories)
+			if (auto* Found = NewCategories.FindByPredicate([&](const auto& C) { return C->Id == Allowed; }))
+				Restricted.Add(*Found);
+		NewCategories = MoveTemp(Restricted);
+	}
 	DREAM_VM_SET(Categories, NewCategories);
-	const FName Previous=NavigationMemory.IsValid() ? NavigationMemory->Category : FName(TEXT("Display"));
-	SelectCategory(Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Previous; }) ? Previous : FName(TEXT("Display")));
+	const FName Home = NewCategories.ContainsByPredicate([&](const auto& C){ return C->Id==InitialCategory; })
+		? InitialCategory : (NewCategories.IsEmpty() ? NAME_None : NewCategories[0]->Id);
+	const FName Previous = NavigationMemory.IsValid() ? NavigationMemory->Category : Home;
+	SelectCategory(Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Previous; }) ? Previous : Home);
 	Refresh();
 	return true;
 }
@@ -269,6 +300,20 @@ void UDreamSettingsViewModel::Shutdown()
 	ScenePreviewOverride.Reset(); RefreshScenePreview();
 }
 
+FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
+{
+    if (Session)
+        for (const auto& Known : Session->GetRegistry().Categories())
+            if (Known.Id == Category) return ResolveCategoryLabel(Known);
+    return BuiltInCategoryLabel(Category);
+}
+
+void UDreamSettingsViewModel::ConfigureVisibleCategories(const TArray<FName>& InCategories, FName InInitialCategory)
+{
+    VisibleCategories = InCategories;
+    InitialCategory = InInitialCategory;
+}
+
 void UDreamSettingsViewModel::SelectCategory(FName Category)
 {
     if (!Session || ShowDetails || ConfirmDisplay || ConfirmClose || ConfirmKeyConflict || ConfirmGameBenchmark || ConfirmReset || !CapturingRow.IsNone()) return;
@@ -282,7 +327,7 @@ void UDreamSettingsViewModel::SelectCategory(FName Category)
     GroupInputRows(Selected);
     const bool NewText=Rows!=Selected || bInputGroupingDirty; bInputGroupingDirty=false;
     DREAM_VM_SET(Rows, Selected);
-    DREAM_VM_SET(CategoryTitle, CategoryLabel(Category));
+    DREAM_VM_SET(CategoryTitle, CategoryPresentation(Category));
     DREAM_VM_SET(ShowColourSamples,Category==TEXT("Accessibility"));
     DREAM_VM_SET(ShowDisplayInformation,Category==TEXT("Display"));
     RefreshGameBenchmark();
@@ -463,7 +508,7 @@ void UDreamSettingsViewModel::RequestResetOptions()
     ResetSetting=Definition && Definition->Category==CurrentCategory ? DetailsSetting : NAME_None;
     DREAM_VM_SET(CanResetSelected,!ResetSetting.IsNone() && Session->Availability(ResetSetting).IsOk());
     DREAM_VM_SET(ResetSelectedLabel,Definition ? FText::Format(LOCTEXT("ResetSelectedNamed","Reset {0}"),Definition->Label) : LOCTEXT("ResetSelected","Reset selected setting"));
-    DREAM_VM_SET(ResetCategoryLabel,FText::Format(LOCTEXT("ResetCategoryNamed","Reset category: {0}"),CategoryLabel(CurrentCategory)));
+    DREAM_VM_SET(ResetCategoryLabel,FText::Format(LOCTEXT("ResetCategoryNamed","Reset category: {0}"),CategoryPresentation(CurrentCategory)));
     DREAM_VM_SET(ConfirmReset,true); Refresh(); OnResetConfirmationOpened.Broadcast();
 }
 void UDreamSettingsViewModel::CancelResetOptions()

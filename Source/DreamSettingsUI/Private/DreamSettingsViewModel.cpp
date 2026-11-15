@@ -226,7 +226,7 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 	Shutdown();
 	if (!Player || !Player->GetGameInstance()) return false;
 	DREAM_VM_SET(IsEditorPreview,Player->GetWorld() && Player->GetWorld()->WorldType==EWorldType::PIE);
-	DREAM_VM_SET(EditorPreviewHint,LOCTEXT("EditorPreviewHint","Editor preview: use Standalone Game for window, HDR, audio device, subtitle, colour correction and language changes. Disabled settings explain why below their controls."));
+	DREAM_VM_SET(EditorPreviewHint,LOCTEXT("EditorPreviewHint","PIE preview: window modes work in New Editor Window; resolution changes the game render size. Language previews game text. HDR, audio device, subtitles and colour correction require Standalone Game."));
 	NavigationMemory=Player->GetSubsystem<UDreamSettingsNavigationMemory>();
 	if (!Presentation) Presentation=NewObject<UDreamSettingsPresentation>(this);
 	DREAM_VM_SET(Details,NewObject<UDreamSettingsDetails>(this));

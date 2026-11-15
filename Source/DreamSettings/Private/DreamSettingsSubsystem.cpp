@@ -147,7 +147,8 @@ void UDreamSettingsSubsystem::InitializeSettings()
 		InitializationResult = FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("NoUserSettings", "Game user settings are unavailable."));
 		return;
 	}
-	Store = MakeShared<FDreamSettingsIniStore>(GGameUserSettingsIni, UserSettings->GetClass()->GetPathName());
+	const bool bPIE = GetWorld() && GetWorld()->WorldType == EWorldType::PIE;
+	Store = MakeShared<FDreamSettingsIniStore>(bPIE ? FPaths::ProjectSavedDir()/TEXT("Config/DreamSettingsPIE.ini") : GGameUserSettingsIni, UserSettings->GetClass()->GetPathName());
     RefreshDisplayCapabilities();
 	InitializationResult = RegisterDreamEngineSettings(*Registry, GetGameInstance());
 	if (!InitializationResult.IsOk()) return;
@@ -341,6 +342,9 @@ void UDreamSettingsSubsystem::Deinitialize()
 		Registry->Validate(Ordered);
 		for (FName Id : Ordered)
 		{
+			// PIE owns a disposable viewport/window. Teardown must not resize it again
+			// (or flash fullscreen) while the editor is removing that viewport.
+			if (Id == TEXT("Display.WindowMode") || Id == TEXT("Display.Resolution")) continue;
 			const auto* Value = StartupValues.Find(Id);
 			if (Registry->Find(Id)->Derive) continue;
 		FDreamSettingValue Current;

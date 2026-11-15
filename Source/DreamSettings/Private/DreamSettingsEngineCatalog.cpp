@@ -1,4 +1,6 @@
 #include "DreamSettingsEngineCatalog.h"
+#include "DreamSettingsDisplayTarget.h"
+#include "Slate/SceneViewport.h"
 #include "DreamSettingsProvider.h"
 #include "Engine/Engine.h"
 #include "Engine/GameInstance.h"
@@ -74,13 +76,7 @@ FDreamSettingsResult RegisterDreamEngineSettings(FDreamSettingsRegistry& Registr
             return CVarAvailability(Name, Priority, Variable);
         }));
     };
-    TWeakObjectPtr<UGameInstance> WeakInstance(GameInstance);
-    auto DisplayAvailability = [WeakInstance]() -> FDreamSettingsResult
-    {
-        const auto* World = WeakInstance.IsValid() ? WeakInstance->GetWorld() : nullptr;
-        if (World && World->WorldType == EWorldType::PIE) return Unavailable(LOCTEXT("StandaloneDisplay", "Use Standalone Game to change resolution or window mode."));
-        return {};
-    };
+    const auto Display = MakeShared<FDreamSettingsDisplayTarget>(GameInstance);
     FDreamSettingDefinition Mode;
     Mode.Id = TEXT("Display.WindowMode"); Mode.Category = TEXT("Display"); Mode.Label = LOCTEXT("WindowMode", "Window mode");
     Mode.Kind = EDreamSettingKind::Choice; Mode.Default = FDreamSettingValue::Id(TEXT("borderless")); Mode.Order = 10; Mode.bRequiresConfirmation = true;
@@ -88,16 +84,16 @@ FDreamSettingsResult RegisterDreamEngineSettings(FDreamSettingsRegistry& Registr
         {TEXT("windowed"), LOCTEXT("Windowed", "Windowed")}};
     Mode.Description = LOCTEXT("DisplayConfirmation", "Display changes must be confirmed within 15 seconds. Otherwise the previous mode is restored.");
     Add(Mode, MakeShared<FProvider>(
-        [](FDreamSettingValue& V) { const auto Mode = GEngine->GetGameUserSettings()->GetFullscreenMode();
+        [Display](FDreamSettingValue& V) { const auto Mode = Display->Mode();
             V = FDreamSettingValue::Id(Mode == EWindowMode::Fullscreen ? TEXT("fullscreen") : Mode == EWindowMode::WindowedFullscreen ? TEXT("borderless") : TEXT("windowed")); return FDreamSettingsResult{}; },
-        [](const FDreamSettingValue& V) { auto* Settings = GEngine->GetGameUserSettings();
-            Settings->SetFullscreenMode(V.Token == TEXT("fullscreen") ? EWindowMode::Fullscreen : V.Token == TEXT("borderless") ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed);
-            Settings->ApplyResolutionSettings(false); return FDreamSettingsResult{}; }, DisplayAvailability,
-        [](const FDreamSettingValue& V)
+        [Display](const FDreamSettingValue& V) { return Display->SetMode(V.Token == TEXT("fullscreen") ? EWindowMode::Fullscreen : V.Token == TEXT("borderless") ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed); },
+        [Display] { return Display->Availability(true); },
+        [Display](const FDreamSettingValue& V)
         {
-            const auto* Viewport = GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
             const auto Requested = V.Token == TEXT("fullscreen") ? EWindowMode::Fullscreen : V.Token == TEXT("borderless") ? EWindowMode::WindowedFullscreen : EWindowMode::Windowed;
-            return Viewport && Viewport->GetWindowMode() == Requested ? FDreamSettingsResult{} : Unavailable(LOCTEXT("WindowNotApplied", "The window has not accepted the requested display mode."));
+            const auto* Viewport = Display->Viewport();
+            const auto Actual = Display->IsPIE() ? Display->Mode() : Viewport ? Viewport->GetWindowMode() : EWindowMode::Windowed;
+            return Viewport && Actual == Requested ? FDreamSettingsResult{} : Unavailable(LOCTEXT("WindowNotApplied", "The window has not accepted the requested display mode."));
         }));
 
     FDreamSettingDefinition Resolution = Mode;
@@ -106,23 +102,22 @@ FDreamSettingsResult RegisterDreamEngineSettings(FDreamSettingsRegistry& Registr
     UKismetSystemLibrary::GetSupportedFullscreenResolutions(Resolutions);
     UKismetSystemLibrary::GetConvenientWindowedResolutions(Windowed);
     for (FIntPoint Size : Windowed) Resolutions.AddUnique(Size);
-    auto* UserSettings = GEngine->GetGameUserSettings();
-    FIntPoint Current = UserSettings->GetScreenResolution();
+    FIntPoint Current = Display->Size();
     if (Current.X <= 0 || Current.Y <= 0) Current = FIntPoint(1280, 720);
     Resolutions.AddUnique(Current);
     Resolutions.Sort([](FIntPoint A, FIntPoint B) { return A.X == B.X ? A.Y < B.Y : A.X < B.X; });
     for (FIntPoint Size : Resolutions)
-        if (Size.X >= 640 && Size.Y >= 480) Resolution.Options.Add({ResolutionId(Size), FText::FromString(ResolutionId(Size))});
+        if (Size == Current || (Size.X >= 640 && Size.Y >= 480)) Resolution.Options.Add({ResolutionId(Size), FText::FromString(ResolutionId(Size))});
     Resolution.Default = FDreamSettingValue::Id(ResolutionId(Current));
     Resolution.Dependencies = { Mode.Id };
     Add(Resolution, MakeShared<FProvider>(
-        [](FDreamSettingValue& V) { V = FDreamSettingValue::Id(ResolutionId(GEngine->GetGameUserSettings()->GetScreenResolution())); return FDreamSettingsResult{}; },
-        [](const FDreamSettingValue& V) { FString X, Y; if (!V.Token.Split(TEXT("x"), &X, &Y)) return Unavailable(LOCTEXT("BadResolution", "Invalid resolution."));
-            auto* Settings = GEngine->GetGameUserSettings(); Settings->SetScreenResolution(FIntPoint(FCString::Atoi(*X), FCString::Atoi(*Y)));
-            Settings->ApplyResolutionSettings(false); return FDreamSettingsResult{}; }, DisplayAvailability,
-        [](const FDreamSettingValue& V)
+        [Display](FDreamSettingValue& V) { V = FDreamSettingValue::Id(ResolutionId(Display->Size())); return FDreamSettingsResult{}; },
+        [Display](const FDreamSettingValue& V) { FString X, Y; if (!V.Token.Split(TEXT("x"), &X, &Y)) return Unavailable(LOCTEXT("BadResolution", "Invalid resolution."));
+            return Display->SetSize(FIntPoint(FCString::Atoi(*X), FCString::Atoi(*Y))); },
+        [Display] { return Display->Availability(false); },
+        [Display](const FDreamSettingValue& V)
         {
-            const auto* Viewport = GEngine->GameViewport ? GEngine->GameViewport->Viewport : nullptr;
+            const auto* Viewport = Display->Viewport();
             return Viewport && ResolutionId(Viewport->GetSizeXY()) == V.Token ? FDreamSettingsResult{} : Unavailable(LOCTEXT("ResolutionNotApplied", "The display has not accepted the requested resolution."));
         }));
 

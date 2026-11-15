@@ -29,7 +29,7 @@ private:
     void WarmCatalogue();
     void Release();
     UDreamSettingsViewModel* FindPresenter() const;
-    FDelegateHandle CultureHandle;
+    FDelegateHandle CultureHandle,TextRevisionHandle;
     TWeakObjectPtr<UDreamSettingsViewModel> Presenter;
     uint64 StartedFrame=0,QuietFrame=0;
     bool bCatalogueReady=false,bWarmCatalogue=false;

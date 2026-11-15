@@ -336,7 +336,9 @@ This does not replace cold-start, HDR and additional-device acceptance.
 
 `Localization.Culture` is a machine-wide previewable preference. The provider calls native
 `SetCurrentLanguage`, preserving the user's regional locale and asset-group language overrides.
-It is unavailable in PIE, where changing language would also change the editor. Stable culture
+In PIE it uses UE's game-localization preview instead, preserving the editor language;
+the last PIE provider restores the previous game preview on teardown. The host must install
+its native localization metadata/resources as well as the plugin target. Stable culture
 identifiers come from `DreamSettingsConfiguration.SupportedCultures` (default `en`, `zh-Hans`);
 the reference selector displays each culture's native name. Unsupported cultures and missing
 non-native plugin `.locres` files are unavailable, rather than appearing to apply successfully.
@@ -674,4 +676,19 @@ The background `/DreamSettings/UI/M_SettingsBackdrop` is an ordinary graph mater
 
 Built-in categories are registered before settings, with localized labels and an explicit order. Hosts' category labels/order are consumed by the presenter; `VisibleCategories` still takes precedence when a host deliberately selects and orders a subset. Unknown host categories retain the registry's name fallback.
 
-`IsEditorPreview` and `EditorPreviewHint` explain PIE's shared-process limits. Window mode/resolution, HDR, audio-device switching, engine subtitles, global colour correction and language changes are intentionally restricted in PIE. Use Standalone Game to exercise them independently of the editor. Each unavailable row also supplies its own reason through `Description`. `HasDescription` lets a custom layout collapse empty help while keeping actual error/restriction text visible. Native availability checks remain authoritative; the preview notice never changes settings or bypasses them.
+`IsEditorPreview` and `EditorPreviewHint` explain PIE's shared-process limits. Window mode works in New Editor Window PIE (the owning window must carry UE's PIEWindow tag); embedded PIE has no independent window and reports that explicitly. Resolution sets the owning PIE render target size in both modes and resizes a windowed PIE window. Fullscreen PIE stretches that render target to its window, so it is a UI/render-resolution preview, not a test of exclusive fullscreen swap-chain behavior. Language uses game-localization preview without changing the editor language. PIE preferences are stored separately in Saved/Config/DreamSettingsPIE.ini; normal game startup settings are unaffected. HDR, audio-device switching, engine subtitles and global colour correction still require Standalone Game. Each unavailable row also supplies its own reason through `Description`. `HasDescription` lets a custom layout collapse empty help while keeping actual error/restriction text visible. Native availability checks remain authoritative; the preview notice never changes settings or bypasses them.
+
+## Launching Standalone Game from the UE editor
+
+UE 5.8's editor launcher can emit `GameUserSettingsINI=PIEGameUserSettings0`: its
+launcher still treats the new config cache key as a filename. DreamSettings normalizes
+only this editor-generated numeric shorthand, when `-PIEVIACONSOLE` is present, to
+`Saved/Config/<platform>/PIEGameUserSettings0.ini` during PostConfigInit. It reloads
+the native branch before GameUserSettings preloads display settings, so the engine
+and the transaction store share one file. Explicit file paths and ordinary game
+launches are unchanged. Test editor-launched Standalone as well as direct `-game`;
+their default settings destinations differ.
+
+Initialization errors remain visible via `Status`/`Ready`. Missing host native
+localization resources in PIE disable the language row with an explanation; they
+do not abort registration of the rest of the settings catalogue.

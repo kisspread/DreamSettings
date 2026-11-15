@@ -9,6 +9,7 @@
 #include "Core/DreamUIGeometry.h"
 #include "Internationalization/TextTransformer.h"
 #include "Internationalization/Internationalization.h"
+#include "Internationalization/TextLocalizationManager.h"
 #include "Engine/World.h"
 
 namespace
@@ -47,6 +48,7 @@ void UDreamSettingsTextPreparation::OnEnable()
     Super::OnEnable();
     if (!GetWorld() || !GetWorld()->IsGameWorld()) return;
     CultureHandle=FInternationalization::Get().OnCultureChanged().AddUObject(this,&ThisClass::BeginCataloguePreparation);
+    TextRevisionHandle=FTextLocalizationManager::Get().OnTextRevisionChangedEvent.AddUObject(this,&ThisClass::BeginCataloguePreparation);
     Presenter=FindPresenter();
     if (Presenter.IsValid())
     {
@@ -159,6 +161,7 @@ void UDreamSettingsTextPreparation::OnDisable()
     if (Presenter.IsValid()) { Presenter->OnDetailsOpened.RemoveAll(this); Presenter->OnRowsPresented.RemoveAll(this); Presenter->OnBenchmarkConfirmationOpened.RemoveAll(this); Presenter->OnResetConfirmationOpened.RemoveAll(this); }
     Presenter.Reset();
     FInternationalization::Get().OnCultureChanged().Remove(CultureHandle); CultureHandle.Reset();
+    FTextLocalizationManager::Get().OnTextRevisionChangedEvent.Remove(TextRevisionHandle); TextRevisionHandle.Reset();
     Release(); Super::OnDisable();
 }
 void UDreamSettingsTextPreparation::OnUnregister()
@@ -166,5 +169,6 @@ void UDreamSettingsTextPreparation::OnUnregister()
     if (Presenter.IsValid()) { Presenter->OnDetailsOpened.RemoveAll(this); Presenter->OnRowsPresented.RemoveAll(this); Presenter->OnBenchmarkConfirmationOpened.RemoveAll(this); Presenter->OnResetConfirmationOpened.RemoveAll(this); }
     Presenter.Reset();
     FInternationalization::Get().OnCultureChanged().Remove(CultureHandle); CultureHandle.Reset();
+    FTextLocalizationManager::Get().OnTextRevisionChangedEvent.Remove(TextRevisionHandle); TextRevisionHandle.Reset();
     Release(); Super::OnUnregister();
 }

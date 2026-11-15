@@ -4,8 +4,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: DreamSettings\n"
-"POT-Creation-Date: 2026-11-14 21:31\n"
-"PO-Revision-Date: 2026-11-14 21:31\n"
+"POT-Creation-Date: 2026-11-15 07:38\n"
+"PO-Revision-Date: 2026-11-15 07:38\n"
 "Language-Team: \n"
 "Language: zh-Hans\n"
 "MIME-Version: 1.0\n"
@@ -706,418 +706,425 @@ msgctxt "DreamSettings,DisplayWindowMissing"
 msgid "Display information becomes available when a game window is open."
 msgstr "游戏窗口打开后可读取显示器信息。"
 
-#. Key:	WindowNotApplied
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(100)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(100)
-msgctxt "DreamSettings,WindowNotApplied"
-msgid "The window has not accepted the requested display mode."
-msgstr "窗口尚未采用请求的显示模式。"
+#. Key:	DisplayViewportMissing
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsDisplayTarget.cpp(30)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsDisplayTarget.cpp(30)
+msgctxt "DreamSettings,DisplayViewportMissing"
+msgid "The game viewport is not ready."
+msgstr "游戏视口尚未准备就绪。"
+
+#. Key:	PIEWindowRequired
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsDisplayTarget.cpp(32)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsDisplayTarget.cpp(32)
+msgctxt "DreamSettings,PIEWindowRequired"
+msgid "Window mode needs New Editor Window (PIE). The embedded viewport has no separate game window."
+msgstr "窗口模式需要“新编辑器窗口（PIE）”；嵌入式视口没有独立的游戏窗口。"
 
 #. Key:	Resolution
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(104)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(104)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(100)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(100)
 msgctxt "DreamSettings,Resolution"
 msgid "Resolution"
 msgstr "分辨率"
 
 #. Key:	BadResolution
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(120)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(120)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(115)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(115)
 msgctxt "DreamSettings,BadResolution"
 msgid "Invalid resolution."
 msgstr "分辨率无效。"
 
 #. Key:	ResolutionNotApplied
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(126)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(126)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(121)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(121)
 msgctxt "DreamSettings,ResolutionNotApplied"
 msgid "The display has not accepted the requested resolution."
 msgstr "显示器尚未采用请求的分辨率。"
 
 #. Key:	FrameLimit
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(129)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(129)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(124)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(124)
 msgctxt "DreamSettings,FrameLimit"
 msgid "Frame rate limit (0 = unlimited)"
 msgstr "帧率上限（0 表示不限）"
 
 #. Key:	FrameLimitPolicy
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(135)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(135)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(130)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(130)
 msgctxt "DreamSettings,FrameLimitPolicy"
 msgid "A higher-priority policy controls the frame rate."
 msgstr "帧率受更高优先级的策略控制。"
 
 #. Key:	SyncInterval
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(138)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(138)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(133)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(133)
 msgctxt "DreamSettings,SyncInterval"
 msgid "VSync interval"
 msgstr "垂直同步间隔"
 
 #. Key:	EnableVSync
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(140)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(140)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(135)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(135)
 msgctxt "DreamSettings,EnableVSync"
 msgid "Enable vertical sync first."
 msgstr "请先开启垂直同步。"
 
 #. Key:	Gamma
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(143)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(143)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(138)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(138)
 msgctxt "DreamSettings,Gamma"
 msgid "Gamma"
 msgstr "伽马值"
 
 #. Key:	ViewDistance
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(151)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(151)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(146)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(146)
 msgctxt "DreamSettings,ViewDistance"
 msgid "View distance"
 msgstr "视距"
 
 #. Key:	Shadows
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(152)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(152)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(147)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(147)
 msgctxt "DreamSettings,Shadows"
 msgid "Shadows"
 msgstr "阴影质量"
 
 #. Key:	GI
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(153)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(153)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(148)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(148)
 msgctxt "DreamSettings,GI"
 msgid "Global illumination"
 msgstr "全局光照"
 
 #. Key:	Reflections
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(154)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(154)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(149)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(149)
 msgctxt "DreamSettings,Reflections"
 msgid "Reflections"
 msgstr "反射质量"
 
 #. Key:	AAQuality
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(155)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(155)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(150)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(150)
 msgctxt "DreamSettings,AAQuality"
 msgid "Anti-aliasing quality"
 msgstr "抗锯齿质量"
 
 #. Key:	Textures
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(156)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(156)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(151)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(151)
 msgctxt "DreamSettings,Textures"
 msgid "Textures"
 msgstr "纹理质量"
 
 #. Key:	Effects
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(157)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(157)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(152)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(152)
 msgctxt "DreamSettings,Effects"
 msgid "Effects"
 msgstr "特效质量"
 
 #. Key:	PostProcess
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(158)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(158)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(153)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(153)
 msgctxt "DreamSettings,PostProcess"
 msgid "Post processing"
 msgstr "后期处理"
 
 #. Key:	Foliage
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(159)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(159)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(154)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(154)
 msgctxt "DreamSettings,Foliage"
 msgid "Foliage"
 msgstr "植被质量"
 
 #. Key:	Shading
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(160)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(160)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(155)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(155)
 msgctxt "DreamSettings,Shading"
 msgid "Shading"
 msgstr "着色质量"
 
 #. Key:	QualityRange
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(175)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(175)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(170)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(170)
 msgctxt "DreamSettings,QualityRange"
 msgid "The current engine quality level is outside the supported range."
 msgstr "当前引擎画质级别超出了支持范围。"
 
 #. Key:	QualityRejected
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(180)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(180)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(175)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(175)
 msgctxt "DreamSettings,QualityRejected"
 msgid "The engine rejected the quality level."
 msgstr "引擎未接受该画质级别。"
 
 #. Key:	Preset
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(184)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(184)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(179)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(179)
 msgctxt "DreamSettings,Preset"
 msgid "Graphics preset"
 msgstr "画质预设"
 
 #. Key:	PresetDescription
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(185)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(185)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(180)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(180)
 msgctxt "DreamSettings,PresetDescription"
 msgid "Set all ten quality groups together. Individual adjustments produce a custom preset."
 msgstr "统一调整全部十组画质设置。单独修改后将显示为自定义预设。"
 
 #. Key:	Custom
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(186)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(186)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(181)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(181)
 msgctxt "DreamSettings,Custom"
 msgid "Custom"
 msgstr "自定义"
 
 #. Key:	FogBacking
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(206)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(206)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(201)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(201)
 msgctxt "DreamSettings,FogBacking"
 msgid "Volumetric fog parameter"
 msgstr "体积雾参数"
 
-#. Key:	Low
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(21)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(21)
-msgctxt "DreamSettings,Low"
-msgid "Low"
-msgstr "低"
-
-#. Key:	Medium
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(21)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(21)
-msgctxt "DreamSettings,Medium"
-msgid "Medium"
-msgstr "中"
-
 #. Key:	Volumetrics
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(211)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(211)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(206)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(206)
 msgctxt "DreamSettings,Volumetrics"
 msgid "Volumetric effects"
 msgstr "体积效果"
 
 #. Key:	VolumetricsDescription
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(212)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(212)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(207)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(207)
 msgctxt "DreamSettings,VolumetricsDescription"
 msgid "Adjust volumetric fog grid detail and temporal sampling."
 msgstr "调整体积雾的网格精度与时域采样。"
 
-#. Key:	Epic
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(22)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(22)
-msgctxt "DreamSettings,Epic"
-msgid "Epic"
-msgstr "极高"
-
-#. Key:	High
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(22)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(22)
-msgctxt "DreamSettings,High"
-msgid "High"
-msgstr "高"
-
-#. Key:	Cinematic
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
-msgctxt "DreamSettings,Cinematic"
-msgid "Cinematic"
-msgstr "电影级"
-
 #. Key:	FogPresetInvalid
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(230)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(230)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(225)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(225)
 msgctxt "DreamSettings,FogPresetInvalid"
 msgid "Invalid volumetric preset."
 msgstr "体积效果预设无效。"
 
+#. Key:	Low
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
+msgctxt "DreamSettings,Low"
+msgid "Low"
+msgstr "低"
+
+#. Key:	Medium
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(23)
+msgctxt "DreamSettings,Medium"
+msgid "Medium"
+msgstr "中"
+
 #. Key:	ResolutionScale
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(236)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(236)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(231)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(231)
 msgctxt "DreamSettings,ResolutionScale"
 msgid "Render resolution (%)"
 msgstr "渲染分辨率（%）"
 
 #. Key:	Automatic
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(237)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(237)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(232)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(232)
 msgctxt "DreamSettings,Automatic"
 msgid "Automatic"
 msgstr "自动"
 
 #. Key:	VendorScale
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(242)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(242)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(237)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(237)
 msgctxt "DreamSettings,VendorScale"
 msgid "Use Upscaling quality to choose a render resolution supported by this SDK."
 msgstr "请通过超分质量选择此 SDK 支持的渲染分辨率。"
 
+#. Key:	Epic
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(24)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(24)
+msgctxt "DreamSettings,Epic"
+msgid "Epic"
+msgstr "极高"
+
+#. Key:	High
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(24)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(24)
+msgctxt "DreamSettings,High"
+msgid "High"
+msgstr "高"
+
 #. Key:	Sharpness
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(245)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(245)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(240)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(240)
 msgctxt "DreamSettings,Sharpness"
 msgid "Image sharpening"
 msgstr "图像锐化"
 
 #. Key:	SceneDefault
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(246)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(246)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(241)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(241)
 msgctxt "DreamSettings,SceneDefault"
 msgid "Scene default"
 msgstr "场景默认"
 
 #. Key:	AA
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(247)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(247)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(242)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(242)
 msgctxt "DreamSettings,AA"
 msgid "Anti-aliasing method"
 msgstr "抗锯齿方式"
 
 #. Key:	Off
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(249)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(249)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(244)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(244)
 msgctxt "DreamSettings,Off"
 msgid "Off"
 msgstr "关"
 
+#. Key:	Cinematic
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(25)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(25)
+msgctxt "DreamSettings,Cinematic"
+msgid "Cinematic"
+msgstr "电影级"
+
 #. Key:	MotionBlur
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(259)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(259)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(254)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(254)
 msgctxt "DreamSettings,MotionBlur"
 msgid "Motion blur quality"
 msgstr "动态模糊质量"
 
 #. Key:	VSM
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(266)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(266)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(261)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(261)
 msgctxt "DreamSettings,VSM"
 msgid "Virtual shadow maps"
 msgstr "虚拟阴影贴图"
 
 #. Key:	ContactShadows
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(267)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(267)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(262)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(262)
 msgctxt "DreamSettings,ContactShadows"
 msgid "Contact shadows"
 msgstr "接触阴影"
 
 #. Key:	HardwareLumen
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(268)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(268)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(263)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(263)
 msgctxt "DreamSettings,HardwareLumen"
 msgid "Hardware ray-traced Lumen"
 msgstr "Lumen 硬件光线追踪"
 
 #. Key:	MegaLights
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(269)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(269)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(264)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(264)
 msgctxt "DreamSettings,MegaLights"
 msgid "MegaLights"
 msgstr "MegaLights"
 
-#. Key:	MissingCVar
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(27)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(27)
-msgctxt "DreamSettings,MissingCVar"
-msgid "This engine does not provide {0}."
-msgstr "当前引擎不提供 {0}。"
-
 #. Key:	Anisotropy
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(270)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(270)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(265)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(265)
 msgctxt "DreamSettings,Anisotropy"
 msgid "Anisotropic filtering"
 msgstr "各向异性过滤"
 
+#. Key:	MissingCVar
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(29)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(29)
+msgctxt "DreamSettings,MissingCVar"
+msgid "This engine does not provide {0}."
+msgstr "当前引擎不提供 {0}。"
+
 #. Key:	ReadOnlyCVar
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(28)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(28)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(30)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(30)
 msgctxt "DreamSettings,ReadOnlyCVar"
 msgid "This feature requires project configuration and cannot be changed at runtime."
 msgstr "此功能需要预先配置项目，无法在运行时更改。"
 
 #. Key:	CVarPolicy
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(30)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(30)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(32)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(32)
 msgctxt "DreamSettings,CVarPolicy"
 msgid "This setting is controlled by a higher-priority engine policy."
 msgstr "此设置受更高优先级的引擎策略控制。"
 
 #. Key:	MissingFeature
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(56)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(56)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(58)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(58)
 msgctxt "DreamSettings,MissingFeature"
 msgid "This feature is not available in this engine."
 msgstr "当前引擎不支持此功能。"
 
 #. Key:	CVarRejected
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(67)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(67)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(69)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(69)
 msgctxt "DreamSettings,CVarRejected"
 msgid "The engine rejected this setting."
 msgstr "引擎未接受此设置。"
 
 #. Key:	RenderDescription
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(69)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(69)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(71)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(71)
 msgctxt "DreamSettings,RenderDescription"
 msgid "Adjust {0}. Unsupported features are unavailable on this device."
 msgstr "调整{0}。当前设备不支持的功能不可用。"
 
 #. Key:	RayTracingUnavailable
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(73)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(73)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(75)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(75)
 msgctxt "DreamSettings,RayTracingUnavailable"
 msgid "Ray tracing is not enabled for this project and graphics device."
 msgstr "当前项目与显卡尚未启用光线追踪。"
 
-#. Key:	StandaloneDisplay
+#. Key:	WindowMode
 #. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(81)
 #: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(81)
-msgctxt "DreamSettings,StandaloneDisplay"
-msgid "Use Standalone Game to change resolution or window mode."
-msgstr "请在独立游戏中更改分辨率或窗口模式。"
-
-#. Key:	WindowMode
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(85)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(85)
 msgctxt "DreamSettings,WindowMode"
 msgid "Window mode"
 msgstr "窗口模式"
 
 #. Key:	Borderless
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(87)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(87)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(83)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(83)
 msgctxt "DreamSettings,Borderless"
 msgid "Borderless"
 msgstr "无边框窗口"
 
 #. Key:	Fullscreen
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(87)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(87)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(83)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(83)
 msgctxt "DreamSettings,Fullscreen"
 msgid "Fullscreen"
 msgstr "全屏"
 
 #. Key:	Windowed
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(88)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(88)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(84)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(84)
 msgctxt "DreamSettings,Windowed"
 msgid "Windowed"
 msgstr "窗口化"
 
 #. Key:	DisplayConfirmation
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(89)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(89)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(85)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(85)
 msgctxt "DreamSettings,DisplayConfirmation"
 msgid "Display changes must be confirmed within 15 seconds. Otherwise the previous mode is restored."
 msgstr "请在 15 秒内确认显示更改，否则将自动恢复之前的模式。"
+
+#. Key:	WindowNotApplied
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(96)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsEngineCatalog.cpp(96)
+msgctxt "DreamSettings,WindowNotApplied"
+msgid "The window has not accepted the requested display mode."
+msgstr "窗口尚未采用请求的显示模式。"
 
 #. Key:	TransactionWrite
 #. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsFileTransaction.cpp(22)
@@ -1392,75 +1399,82 @@ msgctxt "DreamSettings,KeySlotLabel"
 msgid "{0} — {1}"
 msgstr "{0} — {1}"
 
-#. Key:	LanguageStandalone
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(24)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(24)
-msgctxt "DreamSettings,LanguageStandalone"
-msgid "Use Standalone Game to change language without changing the editor."
-msgstr "请在独立游戏中切换语言，以免改变编辑器语言。"
-
-#. Key:	LanguageUnsupported
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(36)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(36)
-msgctxt "DreamSettings,LanguageUnsupported"
-msgid "This language is not supported by this game."
-msgstr "此游戏不支持该语言。"
-
-#. Key:	LanguageFilesMissing
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(42)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(42)
-msgctxt "DreamSettings,LanguageFilesMissing"
-msgid "The language files for this selection are not installed."
-msgstr "尚未安装所选语言的资源文件。"
-
-#. Key:	ExternalLanguage
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(48)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(48)
-msgctxt "DreamSettings,ExternalLanguage"
-msgid "Another system selected a language outside this game's supported list."
-msgstr "其他系统选择了本游戏不支持的语言。"
-
-#. Key:	LanguageIdentifier
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(54)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(54)
-msgctxt "DreamSettings,LanguageIdentifier"
-msgid "A language identifier is required."
-msgstr "需要有效的语言标识。"
-
 #. Key:	LanguageRejected
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(58)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(58)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(108)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(108)
 msgctxt "DreamSettings,LanguageRejected"
 msgid "The game could not switch to this language."
 msgstr "游戏无法切换到该语言。"
 
 #. Key:	LanguageReadback
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(60)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(60)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(110)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(110)
 msgctxt "DreamSettings,LanguageReadback"
 msgid "The selected language was not activated."
 msgstr "所选语言未能生效。"
 
 #. Key:	NoSupportedLanguages
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(69)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(69)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(126)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(126)
 msgctxt "DreamSettings,NoSupportedLanguages"
 msgid "Configure at least one valid supported language."
 msgstr "请配置至少一种有效的支持语言。"
 
 #. Key:	InterfaceLanguage
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(78)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(78)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(135)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(135)
 msgctxt "DreamSettings,InterfaceLanguage"
 msgid "Language"
 msgstr "语言"
 
 #. Key:	InterfaceLanguageHelp
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(79)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(79)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(136)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(136)
 msgctxt "DreamSettings,InterfaceLanguageHelp"
 msgid "Change the language used for game text. Preview the change before applying it."
 msgstr "更改游戏文本的语言。可先预览，再应用更改。"
+
+#. Key:	LanguageGameRequired
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(53)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(53)
+msgctxt "DreamSettings,LanguageGameRequired"
+msgid "Start the game to change its language."
+msgstr "请运行游戏后切换游戏语言。"
+
+#. Key:	PreviewNativeLanguageMissing
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(62)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(62)
+msgctxt "DreamSettings,PreviewNativeLanguageMissing"
+msgid "Install the game's native localization resources to preview languages in PIE."
+msgstr "请安装游戏的原生语言资源，以便在 PIE 中预览语言。"
+
+#. Key:	LanguageUnsupported
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(74)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(74)
+msgctxt "DreamSettings,LanguageUnsupported"
+msgid "This language is not supported by this game."
+msgstr "此游戏不支持该语言。"
+
+#. Key:	LanguageFilesMissing
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(80)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(80)
+msgctxt "DreamSettings,LanguageFilesMissing"
+msgid "The language files for this selection are not installed."
+msgstr "尚未安装所选语言的资源文件。"
+
+#. Key:	ExternalLanguage
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(86)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(86)
+msgctxt "DreamSettings,ExternalLanguage"
+msgid "Another system selected a language outside this game's supported list."
+msgstr "其他系统选择了本游戏不支持的语言。"
+
+#. Key:	LanguageIdentifier
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(92)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsLocalization.cpp(92)
+msgctxt "DreamSettings,LanguageIdentifier"
+msgid "A language identifier is required."
+msgstr "需要有效的语言标识。"
 
 #. Key:	OverrideUnknown
 #. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsModel.cpp(130)
@@ -2002,57 +2016,57 @@ msgid "Game user settings are unavailable."
 msgstr "游戏用户设置不可用。"
 
 #. Key:	OverrideWhileOpen
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(216)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(216)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(217)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(217)
 msgctxt "DreamSettings,OverrideWhileOpen"
 msgid "Close the open settings page before changing the catalogue."
 msgstr "请先关闭设置页面，再修改设置目录。"
 
 #. Key:	CategoryWhileOpen
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(228)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(228)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(229)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(229)
 msgctxt "DreamSettings,CategoryWhileOpen"
 msgid "Close the open settings page before adding a category."
 msgstr "请先关闭设置页面，再添加分类。"
 
 #. Key:	Busy
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(244)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(244)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(245)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(245)
 msgctxt "DreamSettings,Busy"
 msgid "Another settings session is open, or the local player is unavailable."
 msgstr "另一个设置会话正在使用中，或本地玩家不可用。"
 
 #. Key:	WrongPlayer
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(271)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(271)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(272)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(272)
 msgctxt "DreamSettings,WrongPlayer"
 msgid "The local player does not belong to this game instance."
 msgstr "此本地玩家不属于当前游戏实例。"
 
 #. Key:	NoGameBenchmark
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(295)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(295)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(296)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(296)
 msgctxt "DreamSettings,NoGameBenchmark"
 msgid "This game has not provided a gameplay benchmark."
 msgstr "此游戏尚未提供游戏场景基准测试。"
 
 #. Key:	GameBenchmarkStarting
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(296)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(296)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(297)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(297)
 msgctxt "DreamSettings,GameBenchmarkStarting"
 msgid "The game benchmark is already starting."
 msgstr "游戏基准测试正在启动。"
 
 #. Key:	CleanGameBenchmark
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(303)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(303)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(304)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(304)
 msgctxt "DreamSettings,CleanGameBenchmark"
 msgid "Apply or revert pending changes before running the game benchmark."
 msgstr "请先应用或撤销未保存的修改，再运行游戏基准测试。"
 
 #. Key:	BenchmarkUnavailable
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(313)
-#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(313)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(314)
+#: Plugins/DreamSettings/Source/DreamSettings/Private/DreamSettingsSubsystem.cpp(314)
 msgctxt "DreamSettings,BenchmarkUnavailable"
 msgid "Finish the display confirmation before running automatic detection."
 msgstr "请先确认或撤销显示更改，再运行自动检测。"
@@ -2743,54 +2757,61 @@ msgctxt "DreamSettingsUI,SubtitlePreviewLine"
 msgid "This is how dialogue subtitles will appear."
 msgstr "对话字幕将以这样的方式显示。"
 
-#. Key:	HDRWhiteInstructions
+#. Key:	HDRPeakInstructions
 #. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(100)
 #: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(100)
+msgctxt "DreamSettingsUI,HDRPeakInstructions"
+msgid "Increase peak brightness until the cross just blends into the bright patch. Display tone mapping can affect this comparison; use the display's rated peak if the cross never disappears. Apply saves the result; Revert restores your previous settings."
+msgstr "提高峰值亮度，直到十字刚好融入亮色区域。显示器的色调映射可能影响比较；若十字始终不消失，请使用显示器的标称峰值。应用以保存结果，撤销以恢复原先设置。"
+
+#. Key:	HDRWhiteInstructions
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
 msgctxt "DreamSettingsUI,HDRWhiteInstructions"
 msgid "Adjust until the white patch feels comfortable for ordinary surfaces and text. The surrounding grey stays proportional to white. Peak highlights are adjusted separately. Apply saves the result; Revert restores your previous settings."
 msgstr "调整亮度，直到白色区域适合日常画面和文字的舒适观看。周围灰色与白色保持相同比例，高光峰值需单独调整。应用以保存结果，撤销以恢复原先设置。"
 
 #. Key:	AudioListenAction
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(102)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(102)
 msgctxt "DreamSettingsUI,AudioListenAction"
 msgid "Listen"
 msgstr "试听"
 
 #. Key:	SubtitlePreviewAction
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(101)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(102)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(102)
 msgctxt "DreamSettingsUI,SubtitlePreviewAction"
 msgid "Preview"
 msgstr "预览"
 
 #. Key:	ResetSettingHint
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(126)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(126)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(127)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(127)
 msgctxt "DreamSettingsUI,ResetSettingHint"
 msgid "Reset this setting to {0}."
 msgstr "将此项重置为 {0}。"
 
 #. Key:	InvalidNumericEntry
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(167)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(167)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(168)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(168)
 msgctxt "DreamSettingsUI,InvalidNumericEntry"
 msgid "Enter a valid number using '.' for decimals. The current value was kept."
 msgstr "请输入有效数字，小数点使用“.”。已保留当前值。"
 
 #. Key:	RejectedNumericEntry
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(171)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(171)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(172)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(172)
 msgctxt "DreamSettingsUI,RejectedNumericEntry"
 msgid "{0} The current value was kept."
 msgstr "{0} 已保留当前值。"
 
 #. Key:	EditorPreviewHint
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(228)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(228)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(229)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(229)
 msgctxt "DreamSettingsUI,EditorPreviewHint"
-msgid "Editor preview: use Standalone Game for window, HDR, audio device, subtitle, colour correction and language changes. Disabled settings explain why below their controls."
-msgstr "当前为编辑器预览。窗口、HDR、音频设备、字幕、色觉校正和语言设置请在独立运行（Standalone Game）中调整。不可用项的原因显示在控件下方。"
+msgid "PIE preview: window modes work in New Editor Window; resolution changes the game render size. Language previews game text. HDR, audio device, subtitles and colour correction require Standalone Game."
+msgstr "PIE 预览：窗口模式可在“新编辑器窗口”中切换；分辨率调整游戏渲染尺寸；语言切换游戏文本。HDR、音频设备、字幕和色觉校正需在独立游戏中测试。"
 
 #. Key:	Off
 #. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(26)
@@ -2814,186 +2835,179 @@ msgid "Unbound"
 msgstr "未绑定"
 
 #. Key:	KeepDisplayPrompt
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(386)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(386)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(387)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(387)
 msgctxt "DreamSettingsUI,KeepDisplayPrompt"
 msgid "Keep these display settings? Reverting in {0} seconds."
 msgstr "保留这些显示设置吗？将在 {0} 秒后自动还原。"
 
 #. Key:	Current
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(390)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(390)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(391)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(391)
 msgctxt "DreamSettingsUI,Current"
 msgid "Settings are up to date"
 msgstr "设置已更新"
 
 #. Key:	Pending
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(390)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(390)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(391)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(391)
 msgctxt "DreamSettingsUI,Pending"
 msgid "Unsaved changes"
 msgstr "有未保存的更改"
 
 #. Key:	HideScenePreview
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(410)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(410)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(411)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(411)
 msgctxt "DreamSettingsUI,HideScenePreview"
 msgid "Hide scene"
 msgstr "隐藏场景"
 
 #. Key:	ShowScenePreview
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(410)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(410)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(411)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(411)
 msgctxt "DreamSettingsUI,ShowScenePreview"
 msgid "Show scene"
 msgstr "显示场景"
 
 #. Key:	OtherInputBindings
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(434)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(434)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(435)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(435)
 msgctxt "DreamSettingsUI,OtherInputBindings"
 msgid "Other bindings"
 msgstr "其他绑定"
 
 #. Key:	MenuShortcutPart
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(520)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(520)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(521)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(521)
 msgctxt "DreamSettingsUI,MenuShortcutPart"
 msgid "{0}: {1}"
 msgstr "{0}：{1}"
 
 #. Key:	PreviousCategoryShortcut
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(522)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(522)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(523)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(523)
 msgctxt "DreamSettingsUI,PreviousCategoryShortcut"
 msgid "Previous category"
 msgstr "上一分类"
 
 #. Key:	NextCategoryShortcut
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(523)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(523)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(524)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(524)
 msgctxt "DreamSettingsUI,NextCategoryShortcut"
 msgid "Next category"
 msgstr "下一分类"
 
 #. Key:	ApplyShortcut
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(524)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(524)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(525)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(525)
 msgctxt "DreamSettingsUI,ApplyShortcut"
 msgid "Apply"
 msgstr "应用"
 
 #. Key:	ResetShortcut
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(525)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(525)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(526)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(526)
 msgctxt "DreamSettingsUI,ResetShortcut"
 msgid "Reset"
 msgstr "重置"
 
 #. Key:	ResetSelected
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(550)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(550)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
 msgctxt "DreamSettingsUI,ResetSelected"
 msgid "Reset selected setting"
 msgstr "重置选中设置"
 
 #. Key:	ResetSelectedNamed
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(550)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(550)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
 msgctxt "DreamSettingsUI,ResetSelectedNamed"
 msgid "Reset {0}"
 msgstr "重置{0}"
 
 #. Key:	ResetCategoryNamed
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(551)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(552)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(552)
 msgctxt "DreamSettingsUI,ResetCategoryNamed"
 msgid "Reset category: {0}"
 msgstr "重置分类：{0}"
 
 #. Key:	RecommendationDraft
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(610)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(610)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(611)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(611)
 msgctxt "DreamSettingsUI,RecommendationDraft"
 msgid "Recommended graphics settings are ready. Apply to use them, or Revert to discard."
 msgstr "已生成推荐画质设置。应用后使用，或撤销以放弃。"
 
 #. Key:	NoGameBenchmarkUI
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(631)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(631)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(632)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(632)
 msgctxt "DreamSettingsUI,NoGameBenchmarkUI"
 msgid "This game has not provided a gameplay benchmark."
 msgstr "此游戏尚未提供游戏场景基准测试。"
 
 #. Key:	CleanBenchmarkUI
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(633)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(633)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(634)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(634)
 msgctxt "DreamSettingsUI,CleanBenchmarkUI"
 msgid "Apply or revert pending changes before running the game benchmark."
 msgstr "请先应用或撤销未保存的修改，再运行游戏基准测试。"
 
 #. Key:	BenchmarkControllerKey
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(643)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(643)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(644)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(644)
 msgctxt "DreamSettingsUI,BenchmarkControllerKey"
 msgid "Controller {0}"
 msgstr "手柄 {0}"
 
 #. Key:	BenchmarkHint
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(646)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(646)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(647)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(647)
 msgctxt "DreamSettingsUI,BenchmarkHint"
 msgid "Run a gameplay benchmark using applied graphics settings."
 msgstr "使用已应用的画质设置运行游戏场景基准测试。"
 
 #. Key:	BenchmarkShortcutHint
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(647)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(647)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(648)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(648)
 msgctxt "DreamSettingsUI,BenchmarkShortcutHint"
 msgid "Run a gameplay benchmark using applied settings. Shortcuts: {0}."
 msgstr "使用已应用的设置运行游戏场景基准测试。快捷键：{0}。"
 
 #. Key:	EnableSubtitlePreview
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(684)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(684)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(685)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(685)
 msgctxt "DreamSettingsUI,EnableSubtitlePreview"
 msgid "Enable subtitles to preview them."
 msgstr "请先开启字幕，再进行预览。"
 
 #. Key:	NoAudioDevice
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(708)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(708)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(709)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(709)
 msgctxt "DreamSettingsUI,NoAudioDevice"
 msgid "Audio preview is unavailable on this device."
 msgstr "当前设备无法试听音频。"
 
 #. Key:	CapturingKey
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(750)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(750)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(751)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(751)
 msgctxt "DreamSettingsUI,CapturingKey"
 msgid "Press a key, mouse button or controller button. Escape / controller Menu cancels."
 msgstr "请按键盘、鼠标或手柄按键。按 Esc 或手柄 Menu 取消。"
 
 #. Key:	KeyConflictPrompt
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(774)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(774)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(775)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(775)
 msgctxt "DreamSettingsUI,KeyConflictPrompt"
 msgid "{0} is assigned to {1}. Replace clears those bindings. Swap gives the other binding your previous key."
 msgstr "{0} 已绑定到{1}。替换会清除这些绑定；交换会把之前的按键分配给另一项。"
 
 #. Key:	StaleKeyConflict
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(786)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(786)
+#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(787)
+#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(787)
 msgctxt "DreamSettingsUI,StaleKeyConflict"
 msgid "Settings changed while this prompt was open. Choose the key again."
 msgstr "提示显示期间设置发生了变化，请重新选择按键。"
-
-#. Key:	HDRPeakInstructions
-#. SourceLocation:	Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(99)
-#: Plugins/DreamSettings/Source/DreamSettingsUI/Private/DreamSettingsViewModel.cpp(99)
-msgctxt "DreamSettingsUI,HDRPeakInstructions"
-msgid "Increase peak brightness until the cross just blends into the bright patch. Display tone mapping can affect this comparison; use the display's rated peak if the cross never disappears. Apply saves the result; Revert restores your previous settings."
-msgstr "提高峰值亮度，直到十字刚好融入亮色区域。显示器的色调映射可能影响比较；若十字始终不消失，请使用显示器的标称峰值。应用以保存结果，撤销以恢复原先设置。"
 
 #. Key:	Unsupported
 #. SourceLocation:	Plugins/DreamSettingsDLSS/Source/DreamSettingsDLSS/Private/DreamSettingsDLSS.cpp(19)

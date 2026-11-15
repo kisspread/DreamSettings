@@ -665,3 +665,13 @@ The bundled pages attach `UDreamSettingsTextPreparation`. On first open and cult
 Once prepared, ordinary category changes remain interactive and do not show the full-page loading cover. Details and confirmation panels still prepare newly presented content through their existing events.
 
 Custom pages should keep typography templates available in their widget tree. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` on the preparation component to retain per-category preparation until those fonts can be prepared in advance. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.
+
+## Default screen and editor preview
+
+The default layout resolves `/DreamSettings/UI/WBP_DreamSettings` without a layout asset. Its DUI source is `DUI/Settings/Settings.dui`: palette/style resources, a scrollable category rail, current-category highlight, content cards, and persistent page actions. Hosts can supply their own `ScreenClass` and keep the same presenter/session. The example project provides `/Game/Maps/SettingsDefault` to demonstrate this path, alongside its Warcraft example.
+
+The background `/DreamSettings/UI/M_SettingsBackdrop` is an ordinary graph material authored with DreamShader. DreamShader is needed to edit/rebuild its `.dss`, not to run the saved material. Parameters are `BaseColour` (linear RGBA), `AccentColour` (linear RGBA), `LightStrength` (0–1, default 0.35), and `GridStrength` (0–0.1, default 0.012). It is static and has no motion preference to override.
+
+Built-in categories are registered before settings, with localized labels and an explicit order. Hosts' category labels/order are consumed by the presenter; `VisibleCategories` still takes precedence when a host deliberately selects and orders a subset. Unknown host categories retain the registry's name fallback.
+
+`IsEditorPreview` and `EditorPreviewHint` explain PIE's shared-process limits. Window mode/resolution, HDR, audio-device switching, engine subtitles, global colour correction and language changes are intentionally restricted in PIE. Use Standalone Game to exercise them independently of the editor. Each unavailable row also supplies its own reason through `Description`. `HasDescription` lets a custom layout collapse empty help while keeping actual error/restriction text visible. Native availability checks remain authoritative; the preview notice never changes settings or bypasses them.

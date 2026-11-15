@@ -1,0 +1,31 @@
+#pragma material(Domain = UI, BlendMode = Translucent, ShadingModel = Unlit, Backend = Graph)
+/// @asset /DreamGUI/Materials/MF_DreamUI_Shade
+extern float4 DreamUIShade(float4 Tint);
+/// @group Appearance @sort 10 @desc Base colour in linear space
+uniform float4 BaseColour = float4(0.003, 0.006, 0.011, 1.0);
+/// @group Appearance @sort 20 @desc Soft cyan light in linear space
+uniform float4 AccentColour = float4(0.015, 0.12, 0.16, 1.0);
+/// @group Appearance @sort 30 @slider 0 1 @desc Strength of the static background light
+uniform float LightStrength = 0.35;
+/// @group Appearance @sort 40 @slider 0 0.1 @desc Subtle technical grid strength
+uniform float GridStrength = 0.012;
+/// @custom
+float3 SettingsBackdrop(float2 UV, float3 Base, float3 Accent, float Strength, float Grid)
+{
+    float2 Size = 1.0 / max(fwidth(UV), float2(0.0001, 0.0001));
+    float2 P = UV * Size / max(Size.y, 1.0);
+    float2 Light = UV - float2(0.88, 0.12);
+    float Glow = exp(-dot(Light * float2(1.2, 1.7), Light * float2(1.2, 1.7)) * 4.0);
+    float2 Cell = abs(frac(P * 18.0) - 0.5);
+    float2 Pixel = fwidth(P * 18.0);
+    float Line = 1.0 - smoothstep(0.0, max(Pixel.x, Pixel.y), min(Cell.x, Cell.y));
+    float BorderGlow = exp(-abs(UV.x + UV.y * 0.3 - 0.92) * 55.0);
+    return Base + Accent * (Glow * Strength + Line * Grid * Glow + BorderGlow * Strength * 0.1);
+}
+export void M_SettingsBackdrop(inout material m)
+{
+    float3 Colour = SettingsBackdrop(UE.TexCoord(Index = 0), BaseColour.rgb, AccentColour.rgb, LightStrength, GridStrength);
+    float4 Shaded = DreamUIShade(float4(Colour, BaseColour.a));
+    m.EmissiveColor = Shaded.rgb;
+    m.Opacity = Shaded.a;
+}

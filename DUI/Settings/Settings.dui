@@ -7,15 +7,26 @@ viewmodels {
     /Script/DreamSettingsUI.DreamSettingsViewModel Settings = new
 }
 resources {
-    Color Ink = #E8EDF3
-    Color Muted = #9AAABD
-    Color Back = #101820
+    Color Ink = #E3EEF7
+    Color Muted = #9EAFBF
+    Color Back = #080F18
+    Color Accent = #66D9E8
+    Color Surface = #111E2C
 }
 style Caption { FontSize = 22; Color = @Ink; HAlign = Left }
 style Hint { FontSize = 15; Color = @Muted; HAlign = Left }
 style Fill { AnchorData.AnchorMin = (0, 0); AnchorData.AnchorMax = (1, 1); AnchorData.SizeDelta = (0, 0) }
-style Action { StyleSource = Inline; @slot MinDesiredSize = (156, 48) }
-style SmallAction { StyleSource = Inline; @slot Size = (42, 42) }
+style ControlFace {
+    StyleSource = Inline
+    Style.Normal = #1B3042
+    Style.Hovered = #2C4A61
+    Style.Pressed = #12485B
+    Style.Focused = #246278
+    Style.Disabled = #18222D
+    Style.TransitionDuration = 0.10
+}
+style Action : ControlFace { @slot MinDesiredSize = (132, 44) }
+style SmallAction : ControlFace { @slot Size = (42, 42) }
 style SampleColumn { Spacing = 4; @fill }
 style SamplePatch { @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 32) } }
 style SampleLabel { FontSize = 14; HAlign = Center; Color = @Ink; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 20) } }
@@ -25,132 +36,167 @@ Widget Root : Fill {
     + /Script/DreamSettingsUI.DreamSettingsNavigationScope { InitialFocusName = "CategoryButton"; bRequestedActive = true; bRememberPageFocus = true }
     + /Script/DreamSettingsUI.DreamSettingsTextPreparation { CoverName = "TextPreparationCover" }
     + /Script/DreamSettingsUI.DreamSettingsMotionPolicy {}
-    Image Background { RenderOpacity <- Settings.BackgroundOpacity; Brush.TintColor = @Back; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+    Image Background { RenderOpacity <- Settings.BackgroundOpacity; Brush.ResourceObject = /DreamSettings/UI/M_SettingsBackdrop.M_SettingsBackdrop; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
     Image SceneContrast { Shown <- Settings.ScenePreviewActive; Brush.TintColor = #080D1699; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
     VerticalBox Page {
         bIsEnabled <- Settings.PageEnabled
-        Padding = (24, 16, 24, 16)
-        Spacing = 6
+        Padding = (24, 20, 24, 20)
+        Spacing = 8
         @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill }
         HorizontalBox Header {
             bIsEnabled <- Settings.ActionsEnabled
             Spacing = 12
             @slot HorizontalAlignment = Fill
-            Text Title : Caption { Text = "Settings"; FontSize = 36; @fill }
+            Text Title : Caption { Text = "Settings"; FontSize = 40; @fill }
             Native.Button ScenePreview : Action { Shown <- Settings.ScenePreviewAvailable; ToolTipText = "Reveal the live scene while adjusting display or graphics settings."; OnClicked += Settings.ToggleScenePreview(); Text { Text <- Settings.ScenePreviewLabel } }
             Native.Button DetailsButton : Action { ToolTipText <- Settings.Details.Title; OnClicked += Settings.OpenDetails(); Text { Text = "Details" } }
             Native.Button AutoDetect : Action { OnClicked += Settings.AutoDetectGraphics(); Text { Text = "Auto-detect" } }
             Native.Button TestSound : Action { OnClicked += Settings.PlayTestSound(); Text { Text = "Test sound" } }
         }
-        WrapBox Categories {
-            bIsEnabled <- Settings.ActionsEnabled
-            Spacing = (8, 8)
-            @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 48) }
-            for Category in Settings.Categories {
-                Native.Button CategoryButton : Action {
-                    + /Script/DreamSettingsUI.DreamSettingsFocusAnchor { CategoryId <- Category.Id }
-                    OnClicked += Category.Select(); Text { Text <- Category.Label; FontSize = 17 }; @slot Size = (172, 48)
-                }
-            }
-        }
-        HorizontalBox CategoryHeading {
-            Spacing = 12
-            bIsEnabled <- Settings.ActionsEnabled
-            @slot HorizontalAlignment = Fill
-            Text CategoryTitle : Caption { Text <- Settings.CategoryTitle; @fill; @slot { VerticalAlignment = Center; MinDesiredSize = (0, 32) } }
-            Native.Button GameBenchmark : Action { Shown <- Settings.ShowGameBenchmark; bIsEnabled <- Settings.CanStartGameBenchmark; ToolTipText <- Settings.GameBenchmarkHint; OnClicked += Settings.RequestGameBenchmark(); Text { Text = "Game benchmark" } }
-        }
-        if Settings.ShowDisplayInformation {
-            Text DisplayInformation : Hint { Text <- Settings.DisplayInformation; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 64) } }
-        }
-        Native.ScrollBox Options {
-            bRestrictNavigationArea = true
-            NavigationBoundaryRule = Escape
-            StyleSource = Inline
-            ScrollSensitivity = 80
+        Text EditorNotice : Hint { Shown <- Settings.IsEditorPreview; Text <- Settings.EditorPreviewHint; Color = @Accent; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 36) } }
+        Image HeaderRule { Brush.TintColor = #274453; @slot { HorizontalAlignment = Fill; Size = (0, 1) } }
+        HorizontalBox Workspace {
+            Spacing = 20
             @fill
-            if Settings.ShowColourSamples {
-                VerticalBox ColourSamplePanel {
-                    Spacing = 6
-                    @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 84) }
-                    Text ColourSampleTitle : Hint { Text = "Colour samples"; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 22) } }
-                    HorizontalBox ColourSampleStrip {
-                        Spacing = 8
-                        @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 56) }
-                        VerticalBox RedSample : SampleColumn { Image RedPatch : SamplePatch { Brush.TintColor = #D64C4C }; Text RedLabel : SampleLabel { Text = "Red" } }
-                        VerticalBox GreenSample : SampleColumn { Image GreenPatch : SamplePatch { Brush.TintColor = #48D16F }; Text GreenLabel : SampleLabel { Text = "Green" } }
-                        VerticalBox BlueSample : SampleColumn { Image BluePatch : SamplePatch { Brush.TintColor = #4A72DE }; Text BlueLabel : SampleLabel { Text = "Blue" } }
-                        VerticalBox YellowSample : SampleColumn { Image YellowPatch : SamplePatch { Brush.TintColor = #E5D44B }; Text YellowLabel : SampleLabel { Text = "Yellow" } }
-                        VerticalBox CyanSample : SampleColumn { Image CyanPatch : SamplePatch { Brush.TintColor = #42CFD2 }; Text CyanLabel : SampleLabel { Text = "Cyan" } }
-                        VerticalBox MagentaSample : SampleColumn { Image MagentaPatch : SamplePatch { Brush.TintColor = #CA52CA }; Text MagentaLabel : SampleLabel { Text = "Magenta" } }
-                        VerticalBox OrangeSample : SampleColumn { Image OrangePatch : SamplePatch { Brush.TintColor = #E8893D }; Text OrangeLabel : SampleLabel { Text = "Orange" } }
-                        VerticalBox GreySample : SampleColumn { Image GreyPatch : SamplePatch { Brush.TintColor = #AAAAAA }; Text GreyLabel : SampleLabel { Text = "Grey" } }
+            @slot HorizontalAlignment = Fill
+            Widget NavigationSurface {
+                + Overlay {}
+                @slot { Size = (204, 0); VerticalAlignment = Fill }
+                Image NavigationPlate { Brush.TintColor = #0D1925; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                Native.ScrollBox CategoryRail {
+                    StyleSource = Inline
+                    bRestrictNavigationArea = true
+                    NavigationBoundaryRule = Escape
+                    @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill; Padding = (8, 8, 8, 8) }
+                    VerticalBox Categories {
+                        bIsEnabled <- Settings.ActionsEnabled
+                        Spacing = 6
+                        @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 48) }
+                        for Category in Settings.Categories {
+                            Native.Button CategoryButton : Action {
+                                + /Script/DreamSettingsUI.DreamSettingsFocusAnchor { CategoryId <- Category.Id }
+                                OnClicked += Category.Select()
+                                @slot Size = (188, 44)
+                                Widget CategoryFace {
+                                    + Overlay {}
+                                    Image SelectedPlate { Shown <- Category.Selected; Brush.TintColor = #26708A88; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                                    Image SelectedBar { Shown <- Category.Selected; Brush.TintColor = @Accent; @slot { HorizontalAlignment = Left; VerticalAlignment = Fill; Size = (3, 0); Padding = (0, 8, 0, 8) } }
+                                    Text CategoryLabel { Text <- Category.Label; FontSize = 16; Color = @Ink; HAlign = Left; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill; Padding = (14, 0, 14, 0) } }
+                                }
+                            }
+                        }
                     }
                 }
             }
-            for Row in Settings.Rows {
-                VerticalBox Setting {
-                    + /Script/DreamSettingsUI.DreamSettingsFocusAnchor { SettingId <- Row.NavigationId }
-                    Spacing = 4
-                    Padding = (12, 8, 24, 12)
-                    @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 128) }
-                    Text InputGroupTitle : Caption { Shown <- Row.HasGroupHeading; Text <- Row.GroupTitle; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 32) } }
-                    Image InputGroupDivider { Shown <- Row.HasGroupHeading; Brush.TintColor = #52677F; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 1); MaxDesiredSize = (0, 1) } }
-                    Text Label : Caption { Text <- Row.Label; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 28) } }
-                    HorizontalBox Controls {
-                        Spacing = 12
-                        @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 42) }
-                        Native.Slider Number {
-                            StyleSource = Inline
-                            Shown <- Row.IsScalar
-                            bIsEnabled <- Row.Enabled
-                            MinValue <- Row.Minimum
-                            MaxValue <- Row.Maximum
-                            StepSize <- Row.Step
-                            Value <- Row.Number
-                            OnValueChanged += Row.SetNumber
-                            @slot Size = (240, 42)
+            VerticalBox CategoryContent {
+                Spacing = 10
+                @fill
+                @slot VerticalAlignment = Fill
+                HorizontalBox CategoryHeading {
+                    Spacing = 12
+                    bIsEnabled <- Settings.ActionsEnabled
+                    @slot HorizontalAlignment = Fill
+                    Text CategoryTitle : Caption { FontSize = 28; Text <- Settings.CategoryTitle; @fill; @slot { VerticalAlignment = Center; MinDesiredSize = (0, 32) } }
+                    Native.Button GameBenchmark : Action { Shown <- Settings.ShowGameBenchmark; bIsEnabled <- Settings.CanStartGameBenchmark; ToolTipText <- Settings.GameBenchmarkHint; OnClicked += Settings.RequestGameBenchmark(); Text { Text = "Game benchmark" } }
+                }
+                if Settings.ShowDisplayInformation {
+                    Text DisplayInformation : Hint { Text <- Settings.DisplayInformation; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 64) } }
+                }
+                Native.ScrollBox Options {
+                    bRestrictNavigationArea = true
+                    NavigationBoundaryRule = Escape
+                    StyleSource = Inline
+                    ScrollSensitivity = 80
+                    @fill
+                    if Settings.ShowColourSamples {
+                        VerticalBox ColourSamplePanel {
+                            Spacing = 6
+                            @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 84) }
+                            Text ColourSampleTitle : Hint { Text = "Colour samples"; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 22) } }
+                            HorizontalBox ColourSampleStrip {
+                                Spacing = 8
+                                @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 56) }
+                                VerticalBox RedSample : SampleColumn { Image RedPatch : SamplePatch { Brush.TintColor = #D64C4C }; Text RedLabel : SampleLabel { Text = "Red" } }
+                                VerticalBox GreenSample : SampleColumn { Image GreenPatch : SamplePatch { Brush.TintColor = #48D16F }; Text GreenLabel : SampleLabel { Text = "Green" } }
+                                VerticalBox BlueSample : SampleColumn { Image BluePatch : SamplePatch { Brush.TintColor = #4A72DE }; Text BlueLabel : SampleLabel { Text = "Blue" } }
+                                VerticalBox YellowSample : SampleColumn { Image YellowPatch : SamplePatch { Brush.TintColor = #E5D44B }; Text YellowLabel : SampleLabel { Text = "Yellow" } }
+                                VerticalBox CyanSample : SampleColumn { Image CyanPatch : SamplePatch { Brush.TintColor = #42CFD2 }; Text CyanLabel : SampleLabel { Text = "Cyan" } }
+                                VerticalBox MagentaSample : SampleColumn { Image MagentaPatch : SamplePatch { Brush.TintColor = #CA52CA }; Text MagentaLabel : SampleLabel { Text = "Magenta" } }
+                                VerticalBox OrangeSample : SampleColumn { Image OrangePatch : SamplePatch { Brush.TintColor = #E8893D }; Text OrangeLabel : SampleLabel { Text = "Orange" } }
+                                VerticalBox GreySample : SampleColumn { Image GreyPatch : SamplePatch { Brush.TintColor = #AAAAAA }; Text GreyLabel : SampleLabel { Text = "Grey" } }
+                            }
                         }
-                        SettingStepButton Previous : SmallAction { Shown <- Row.IsOrdinary; bIsEnabled <- Row.Enabled; RepeatEnabled <- Row.IsScalar; OnStep += Row.Previous(); Text { Text = "<" } }
-                        Text Value : Caption { Shown <- Row.IsDiscrete; Text <- Row.ValueText; HAlign = Center; @fill; @slot MinDesiredSize = (150, 42) }
-                        SettingNumberInput NumberEntry {
-                            StyleSource = Inline
-                            Style.FontSize = 22
-                            Justification = Center
-                            MaxLength = 32
-                            Shown <- Row.IsScalar
-                            bIsEnabled <- Row.Enabled
-                            BoundText <- Row.NumericText
-                            OnNumberSubmitted += Row.CommitNumberText
-                            @fill
-                            @slot MinDesiredSize = (150, 42)
-                        }
-                        SettingStepButton Next : SmallAction { Shown <- Row.IsOrdinary; bIsEnabled <- Row.Enabled; RepeatEnabled <- Row.IsScalar; OnStep += Row.Next(); Text { Text = ">" } }
-                        GameKeySelector KeyCapture {
-                            Shown <- Row.IsKey
-                            StyleSource = Inline
-                            bIsEnabled <- Row.Enabled
-                            DisplayKey <- Row.SelectedKey
-                            IconFamily <- Row.IconFamily
-                            OnKeySelected += Row.SetKey
-                            OnIsListeningChanged += Row.SetListening
-                            NoKeyText = "Unbound — click to assign"
-                            ListeningText = "Press a key… (Esc to cancel)"
-                            @fill
-                            @slot MinDesiredSize = (360, 42)
-                        }
-                        Native.Button ClearKey : SmallAction { Shown <- Row.IsKey; bIsEnabled <- Row.Enabled; OnClicked += Row.ClearKey(); Text { Text = "Clear"; FontSize = 14 }; @slot Size = (68, 42) }
-                        Native.Button Reset : SmallAction { bIsEnabled <- Row.Enabled; ToolTipText <- Row.ResetHint; OnClicked += Row.Reset(); Text { Text = "Reset"; FontSize = 14 }; @slot Size = (68, 42) }
-                        Native.Button Sample : SmallAction { Shown <- Row.HasSample; bIsEnabled <- Row.Enabled; OnClicked += Row.PlaySample(); Text { Text <- Row.SampleLabel; FontSize = 14 }; @slot Size = (92, 42) }
                     }
-                    Text Description : Hint { Text <- Row.Description; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 36) } }
-                    if Row.HasHDRPreview {
-                        Image HDRCalibrationPattern {
-                            Brush.ResourceObject = /DreamSettings/UI/M_HDRCalibration.M_HDRCalibration
-                            + /Script/DreamSettingsUI.DreamSettingsHDRPreview { CandidateNits <- Row.Number; PeakPattern <- Row.IsHDRPeak }
-                            @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 180) }
+                    for Row in Settings.Rows {
+                        Widget Setting {
+                            + Overlay {}
+                            + /Script/DreamSettingsUI.DreamSettingsFocusAnchor { SettingId <- Row.NavigationId }
+                            @slot { HorizontalAlignment = Fill; Padding = (0, 0, 10, 8) }
+                            Image RowPlate { Brush.TintColor = @Surface; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                            VerticalBox RowContent {
+                                Spacing = 4
+                                Padding = (16, 8, 16, 8)
+                                @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 0) }
+                                Text InputGroupTitle : Caption { Shown <- Row.HasGroupHeading; Text <- Row.GroupTitle; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 32) } }
+                                Image InputGroupDivider { Shown <- Row.HasGroupHeading; Brush.TintColor = #52677F; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 1); MaxDesiredSize = (0, 1) } }
+                                Text Label : Caption { Text <- Row.Label; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 28) } }
+                                HorizontalBox Controls {
+                                    Spacing = 12
+                                    @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 42) }
+                                    Native.Slider Number {
+                                        StyleSource = Inline
+                                        Shown <- Row.IsScalar
+                                        bIsEnabled <- Row.Enabled
+                                        MinValue <- Row.Minimum
+                                        MaxValue <- Row.Maximum
+                                        StepSize <- Row.Step
+                                        Value <- Row.Number
+                                        OnValueChanged += Row.SetNumber
+                                        @slot Size = (180, 42)
+                                    }
+                                    SettingStepButton Previous : SmallAction { Shown <- Row.IsOrdinary; bIsEnabled <- Row.Enabled; RepeatEnabled <- Row.IsScalar; OnStep += Row.Previous(); Text { Text = "<" } }
+                                    Text Value : Caption { Shown <- Row.IsDiscrete; Text <- Row.ValueText; HAlign = Center; @fill; @slot MinDesiredSize = (150, 42) }
+                                    SettingNumberInput NumberEntry {
+                                        StyleSource = Inline
+                                        Style.FontSize = 22
+                                        Justification = Center
+                                        MaxLength = 32
+                                        Shown <- Row.IsScalar
+                                        bIsEnabled <- Row.Enabled
+                                        BoundText <- Row.NumericText
+                                        OnNumberSubmitted += Row.CommitNumberText
+                                        @fill
+                                        @slot MinDesiredSize = (150, 42)
+                                    }
+                                    SettingStepButton Next : SmallAction { Shown <- Row.IsOrdinary; bIsEnabled <- Row.Enabled; RepeatEnabled <- Row.IsScalar; OnStep += Row.Next(); Text { Text = ">" } }
+                                    GameKeySelector KeyCapture {
+                                        Shown <- Row.IsKey
+                                        StyleSource = Inline
+                                        bIsEnabled <- Row.Enabled
+                                        DisplayKey <- Row.SelectedKey
+                                        IconFamily <- Row.IconFamily
+                                        OnKeySelected += Row.SetKey
+                                        OnIsListeningChanged += Row.SetListening
+                                        NoKeyText = "Unbound — click to assign"
+                                        ListeningText = "Press a key… (Esc to cancel)"
+                                        @fill
+                                        @slot MinDesiredSize = (360, 42)
+                                    }
+                                    Native.Button ClearKey : SmallAction { Shown <- Row.IsKey; bIsEnabled <- Row.Enabled; OnClicked += Row.ClearKey(); Text { Text = "Clear"; FontSize = 14 }; @slot Size = (68, 42) }
+                                    Native.Button Reset : SmallAction { bIsEnabled <- Row.Enabled; ToolTipText <- Row.ResetHint; OnClicked += Row.Reset(); Text { Text = "Reset"; FontSize = 14 }; @slot Size = (68, 42) }
+                                    Native.Button Sample : SmallAction { Shown <- Row.HasSample; bIsEnabled <- Row.Enabled; OnClicked += Row.PlaySample(); Text { Text <- Row.SampleLabel; FontSize = 14 }; @slot Size = (92, 42) }
+                                }
+                                Text Description : Hint { Shown <- Row.HasDescription; Text <- Row.Description; bAutoWrapText = true; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 20) } }
+                                if Row.HasHDRPreview {
+                                    Image HDRCalibrationPattern {
+                                        Brush.ResourceObject = /DreamSettings/UI/M_HDRCalibration.M_HDRCalibration
+                                        + /Script/DreamSettingsUI.DreamSettingsHDRPreview { CandidateNits <- Row.Number; PeakPattern <- Row.IsHDRPeak }
+                                        @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 180) }
+                                    }
+                                    Text HDRCalibrationInstructions : Hint { Text <- Row.HDRInstructions; bAutoWrapText = true; @slot HorizontalAlignment = Fill }
+                                }
+                            }
                         }
-                        Text HDRCalibrationInstructions : Hint { Text <- Row.HDRInstructions; bAutoWrapText = true; @slot HorizontalAlignment = Fill }
                     }
                 }
             }
@@ -166,7 +212,7 @@ Widget Root : Fill {
         Text State : Hint { Text <- Settings.Status; @slot { HorizontalAlignment = Fill; MinDesiredSize = (0, 28) } }
         HorizontalBox Actions {
             bIsEnabled <- Settings.ActionsEnabled
-            Spacing = 16
+            Spacing = 12
             Native.Button Apply : Action { OnClicked += Settings.Apply(); Text { Text = "Apply" } }
             Native.Button Revert : Action { OnClicked += Settings.Revert(); Text { Text = "Revert" } }
             Native.Button ResetCategory : Action { ToolTipText = "Restore defaults for this category only. Apply saves the changes."; OnClicked += Settings.ResetCurrentCategory(); Text { Text = "Reset category" } }

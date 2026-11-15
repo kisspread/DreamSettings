@@ -111,6 +111,24 @@ void UDreamSettingsSubsystem::InitializeSettings()
 	bSettingsInitialized = true;
 	Registry = MakeShared<FDreamSettingsRegistry>();
 	if (!InitializationResult.IsOk()) return;
+	// Register the built-in catalogue's metadata before its rows. The generic registry's
+	// name fallback remains available to unknown host categories. Keep existing localization keys.
+	const FDreamSettingCategory Categories[]={
+		{TEXT("Display"),NSLOCTEXT("DreamSettingsUI","DisplayCategory","Display"),{},10,EDreamSettingCategoryContent::DisplayInformation|EDreamSettingCategoryContent::ScenePreview},
+		{TEXT("Graphics"),NSLOCTEXT("DreamSettingsUI","GraphicsCategory","Graphics"),{},20,EDreamSettingCategoryContent::ScenePreview|EDreamSettingCategoryContent::GameBenchmark},
+		{TEXT("Audio"),NSLOCTEXT("DreamSettingsUI","AudioCategory","Audio"),{},30},
+		{TEXT("Input"),NSLOCTEXT("DreamSettingsUI","InputCategory","Controls"),{},40},
+		{TEXT("Gameplay"),NSLOCTEXT("DreamSettingsUI","GameplayCategory","Gameplay"),{},50},
+		{TEXT("KeyboardKeys"),NSLOCTEXT("DreamSettingsUI","KeyboardKeysCategory","Keyboard / mouse"),{},60},
+		{TEXT("GamepadKeys"),NSLOCTEXT("DreamSettingsUI","GamepadKeysCategory","Gamepad buttons"),{},70},
+		{TEXT("Accessibility"),NSLOCTEXT("DreamSettingsUI","AccessibilityCategory","Accessibility"),{},80,EDreamSettingCategoryContent::ColourSamples},
+		{TEXT("Localization"),NSLOCTEXT("DreamSettingsUI","LanguageCategory","Language"),{},90}
+	};
+	for (const auto& Category:Categories)
+	{
+		InitializationResult=Registry->RegisterCategory(Category);
+		if (!InitializationResult.IsOk()) return;
+	}
 	FDreamSettingDefinition VSync;
 	VSync.Id = DreamSettingIds::VSync;
 	VSync.Category = TEXT("Display");

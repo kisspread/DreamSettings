@@ -75,6 +75,7 @@ void UDreamSettingRowViewModel::Refresh()
     if (!FMath::IsNearlyEqual(static_cast<double>(Number),Value.Number,1.e-6)) NumericError=FText::GetEmpty();
     DREAM_VM_SET(Label, D->Label);
     DREAM_VM_SET(Description, Availability.IsOk() ? (!NumericError.IsEmpty() ? NumericError : (D->DynamicDescription ? D->DynamicDescription(S->GetPending()) : D->Description)) : Availability.Message);
+    DREAM_VM_SET(HasDescription,!Description.IsEmpty());
     DREAM_VM_SET(Enabled, S->IsOpen() && !S->IsAwaitingConfirmation() && !S->IsBusy() && Availability.IsOk() && (!Owner.IsValid() || Owner->CanEditRow(Id)));
     DREAM_VM_SET(IsScalar, D->Kind == EDreamSettingKind::Scalar);
     DREAM_VM_SET(IsKey, D->Kind == EDreamSettingKind::Key);
@@ -224,6 +225,8 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 {
 	Shutdown();
 	if (!Player || !Player->GetGameInstance()) return false;
+	DREAM_VM_SET(IsEditorPreview,Player->GetWorld() && Player->GetWorld()->WorldType==EWorldType::PIE);
+	DREAM_VM_SET(EditorPreviewHint,LOCTEXT("EditorPreviewHint","Editor preview: use Standalone Game for window, HDR, audio device, subtitle, colour correction and language changes. Disabled settings explain why below their controls."));
 	NavigationMemory=Player->GetSubsystem<UDreamSettingsNavigationMemory>();
 	if (!Presentation) Presentation=NewObject<UDreamSettingsPresentation>(this);
 	DREAM_VM_SET(Details,NewObject<UDreamSettingsDetails>(this));
@@ -245,12 +248,13 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 		if (Session->GetRegistry().Find(Id)->bHidden) continue;
 		auto* Row = NewObject<UDreamSettingRowViewModel>(this);
 		Row->Initialize(Session, Id,this); AllRows.Add(Row);
-		const FName Category = Session->GetRegistry().Find(Id)->Category;
-		if (!NewCategories.ContainsByPredicate([&](const auto& C) { return C->Id == Category; }))
-		{
-			auto* C = NewObject<UDreamSettingsCategoryViewModel>(this); C->Id = Category; C->Owner = this; C->Label = CategoryPresentation(Category);
-			NewCategories.Add(C);
-		}
+	}
+	for (const auto& Category:Session->GetRegistry().Categories())
+	{
+		if (!AllRows.ContainsByPredicate([&](const auto& Row){ return Session->GetRegistry().Find(Row->GetSettingId())->Category==Category.Id; })) continue;
+		auto* C=NewObject<UDreamSettingsCategoryViewModel>(this);
+		C->Id=Category.Id; C->Owner=this; C->Label=ResolveCategoryLabel(Category);
+		NewCategories.Add(C);
 	}
 	// A host that restricts the page keeps only its categories, in the host's order, after dropping empty ones.
 	if (!VisibleCategories.IsEmpty())

@@ -52,6 +52,7 @@ public:
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool HasGroupHeading=false;
     void SetGroupHeading(const FText& Title,bool Visible) { DREAM_VM_SET(GroupTitle,Title); DREAM_VM_SET(HasGroupHeading,Visible); }
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText Description;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool HasDescription=false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText ValueText;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText DefaultValueText;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText ResetHint;
@@ -182,6 +183,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText DisplayPrompt;
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool ConfirmDisplay = false;
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool PageEnabled = false;
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsEditorPreview = false;
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FText EditorPreviewHint;
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool VSync = false;
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float MasterVolume = 1;

@@ -1,5 +1,6 @@
 #include "DreamSettingsTextPreparation.h"
 #include "DreamSettingsViewModel.h"
+#include "DreamSettingsConfiguration.h"
 #include "Core/DreamUserWidget.h"
 #include "Core/Components/DreamWidget.h"
 #include "Core/Components/DreamText.h"
@@ -10,6 +11,10 @@
 #include "Internationalization/TextTransformer.h"
 #include "Internationalization/Internationalization.h"
 #include "Internationalization/TextLocalizationManager.h"
+#include "Internationalization/TextLocalizationResource.h"
+#include "Interfaces/IPluginManager.h"
+#include "Misc/Paths.h"
+#include "HAL/FileManager.h"
 #include "Engine/World.h"
 
 namespace
@@ -62,11 +67,15 @@ void UDreamSettingsTextPreparation::OnEnable()
 void UDreamSettingsTextPreparation::BeginCataloguePreparation()
 {
     bCatalogueReady=false; bWarmCatalogue=bPrewarmCategories; CatalogueFonts.Reset();
-    BeginPreparation();
+    if (!bHasPresented || !bPrewarmCategories) { BeginPreparation(); return; }
+    // An already visible page stays visible and interactive. Native FText switches
+    // its display strings in place; never blank the page for a cached language.
+    StartedFrame=GFrameCounter; QuietFrame=0;
+    SetCanExecuteTick(true);
 }
 void UDreamSettingsTextPreparation::RowsPresented()
 {
-    if (!bPrewarmCategories || !bCatalogueReady) BeginPreparation();
+    if (!bPrewarmCategories || (!bHasPresented && !bCatalogueReady)) BeginPreparation();
 }
 void UDreamSettingsTextPreparation::WarmCatalogue()
 {
@@ -82,6 +91,42 @@ void UDreamSettingsTextPreparation::WarmCatalogue()
     };
     CollectStaticTexts(GetWidget());
     Content+=TEXT("\n")+FString::Join(StaticTexts,TEXT("\n"));
+    TMap<FString,FString> LanguageTexts;
+    LanguageTexts.Add(FString(),Content);
+    if (!bHasPresented)
+    {
+        // Read resources without switching the process culture or publishing text
+        // revisions. Prepare the installed built-in languages before the first
+        // page is revealed, including strings not on the current category.
+        if (const auto Plugin=IPluginManager::Get().FindPlugin(TEXT("DreamSettings")))
+        {
+            for (const auto& Language:GetDefault<UDreamSettingsConfiguration>()->SupportedCultures)
+            {
+                const FString Path=Plugin->GetContentDir()/TEXT("Localization/DreamSettings")/Language/TEXT("DreamSettings.locres");
+                if (!IFileManager::Get().FileExists(*Path)) continue;
+                FTextLocalizationResource Resource;
+                if (!Resource.LoadFromFile(Path,0)) continue;
+                TArray<FString> Strings;
+                for (const auto& Entry:Resource.Entries)
+                    if (Entry.Value.LocalizedString) Strings.AddUnique(*Entry.Value.LocalizedString);
+                LanguageTexts.Add(Language,FString::Join(Strings,TEXT("\n")));
+            }
+        }
+    }
+    TArray<TPair<FString,FString>> TextBatches;
+    for (const auto& Language:LanguageTexts)
+    {
+        TArray<FString> Lines; Language.Value.ParseIntoArrayLines(Lines,false);
+        FString Batch;
+        for (const FString& Line:Lines)
+        {
+            if (!Batch.IsEmpty() && Batch.Len()+Line.Len()>1024)
+            { TextBatches.Emplace(Language.Key,MoveTemp(Batch)); Batch.Reset(); }
+            // Keep whole translation lines together so rich-text spans stay intact.
+            Batch+=Line+TEXT("\n");
+        }
+        if (!Batch.IsEmpty()) TextBatches.Emplace(Language.Key,MoveTemp(Batch));
+    }
     TArray<FDreamTextLayoutInput> PreparedStyles;
     TSet<UDreamUIFontData_FreeTypeRender*> Fonts;
     TFunction<void(UDreamWidget*)> Visit=[&](UDreamWidget* Node)
@@ -89,26 +134,30 @@ void UDreamSettingsTextPreparation::WarmCatalogue()
         if (!Node) return;
         if (auto* Text=Cast<UDreamText>(Node->GetVisual()); Text && Text->GetFont())
         {
-            auto Input=UDreamText::MakeLayoutInput(Text,Text->GetFontSize());
-            Input.Content=Content;
-            if (Input.TextTransform==EDreamUITextTransformPolicy::ToUpper) Input.Content=FTextTransformer::ToUpper(Content);
-            else if (Input.TextTransform==EDreamUITextTransformPolicy::ToLower) Input.Content=FTextTransformer::ToLower(Content);
-            // Layout shape/raster settings come from the real text. The temporary box must not
-            // truncate catalogue paragraphs just because its template widget is currently hidden.
-            Input.Width=10000; Input.Height=10000; Input.Pivot=FVector2f::ZeroVector;
-            Input.bAutoWrapText=false; Input.WrapTextAt=0;
-            Input.OverflowType=EDreamUITextOverflowType::HorizontalOverflow;
-            if (!PreparedStyles.Contains(Input))
+            for (const auto& Language:TextBatches)
             {
-                PreparedStyles.Add(Input);
-                FDreamTextDisplayList Display;
-                FDreamTextLayoutEngine::Layout(Input,Display);
-                auto Paint=UDreamText::MakePaintParams(Text);
-                Paint.Coverage.Report=nullptr; // Do not write the visible component's diagnostic counters.
-                FDreamUIGeometry Geometry;
-                TArray<FDreamUITextCharProperty> Characters;
-                FDreamTextPainter::Paint(Display,Paint,Geometry,Characters);
-                CollectFont(Cast<UDreamUIFontData_FreeTypeRender>(Text->GetFont()),Fonts);
+                auto Input=UDreamText::MakeLayoutInput(Text,Text->GetFontSize());
+                if (!Language.Key.IsEmpty()) Input.Language=Language.Key;
+                Input.Content=Language.Value;
+                if (Input.TextTransform==EDreamUITextTransformPolicy::ToUpper) Input.Content=FTextTransformer::ToUpper(Input.Content);
+                else if (Input.TextTransform==EDreamUITextTransformPolicy::ToLower) Input.Content=FTextTransformer::ToLower(Input.Content);
+                // Layout shape/raster settings come from the real text. The temporary box must not
+                // truncate catalogue paragraphs just because its template widget is currently hidden.
+                Input.Width=10000; Input.Height=10000; Input.Pivot=FVector2f::ZeroVector;
+                Input.bAutoWrapText=false; Input.WrapTextAt=0;
+                Input.OverflowType=EDreamUITextOverflowType::HorizontalOverflow;
+                if (!PreparedStyles.Contains(Input))
+                {
+                    PreparedStyles.Add(Input);
+                    FDreamTextDisplayList Display;
+                    FDreamTextLayoutEngine::Layout(Input,Display);
+                    auto Paint=UDreamText::MakePaintParams(Text);
+                    Paint.Coverage.Report=nullptr; // Do not write the visible component's diagnostic counters.
+                    FDreamUIGeometry Geometry;
+                    TArray<FDreamUITextCharProperty> Characters;
+                    FDreamTextPainter::Paint(Display,Paint,Geometry,Characters);
+                    CollectFont(Cast<UDreamUIFontData_FreeTypeRender>(Text->GetFont()),Fonts);
+                }
             }
         }
         // Hidden scalar/key/sample controls still provide their actual typography templates.
@@ -142,6 +191,7 @@ void UDreamSettingsTextPreparation::Tick(float DeltaTime)
     // Glyph-ready callbacks rebuild geometry, and the next font flush queues its GPU uploads.
     if (GFrameCounter<QuietFrame+2) return;
     bCatalogueReady=bPrewarmCategories;
+    bHasPresented=true;
     Release();
 }
 void UDreamSettingsTextPreparation::Release()

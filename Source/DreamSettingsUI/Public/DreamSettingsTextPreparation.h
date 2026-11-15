@@ -32,6 +32,6 @@ private:
     FDelegateHandle CultureHandle,TextRevisionHandle;
     TWeakObjectPtr<UDreamSettingsViewModel> Presenter;
     uint64 StartedFrame=0,QuietFrame=0;
-    bool bCatalogueReady=false,bWarmCatalogue=false;
+    bool bCatalogueReady=false,bWarmCatalogue=false,bHasPresented=false;
     UPROPERTY(Transient) TArray<TObjectPtr<UDreamUIFontData_FreeTypeRender>> CatalogueFonts;
 };

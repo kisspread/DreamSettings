@@ -358,14 +358,16 @@ the reviewed glossary using `python Tools/localize_settings.py apply` / `check`,
 re-gather after adding or changing source text. Adding a new language also requires translated
 resources and host packaging/font support; editing the supported-cultures list alone is insufficient.
 
-The reference page attaches `DreamSettingsTextPreparation` to its root. Opening a page or changing
-the native language activates `PreparingText`; an opaque final overlay named `TextPreparationCover`
-binds to that flag and contains a font-free DreamGUI throbber. Keep the page underneath alive so its
-normal shaped glyphs can be requested. The component checks the page's font/fallback queues without
-blocking the game thread, then leaves two quiet frames for geometry/atlas updates before releasing
-the overlay and restoring actions. The page navigation scope restores focus after this temporary
-disabled state. Custom themes can replace the overlay and set `CoverName`; they must retain an opaque
-font-independent loading layer. This is UI presentation policy, not a dependency of the Core provider.
+The reference page attaches `DreamSettingsTextPreparation` to its root. First opening a page
+activates `PreparingText` while the real typography and installed built-in supported languages
+are prewarmed. It reads plugin `.locres` resources without changing the process language.
+The initial font-independent `TextPreparationCover` is released after font work and GPU upload
+frames settle. Subsequent language switches keep the existing page visible and interactive;
+text revisions refresh preparation in the background and do not reactivate the cover. This
+moves the built-in en/zh-Hans glyph cost to initial page preparation rather than each click.
+It does not promise zero resource-loading time, or prewarm arbitrary host strings and newly
+instantiated fonts. The existing `bPrewarmCategories=false` opt-out retains the blocking
+per-category/translation preparation policy for such custom pages.
 
 ## Native subtitles
 
@@ -592,16 +594,12 @@ busy operation are deferred until the page is usable, preserving focus and pendi
 
 ### Dynamic text readiness
 
-The bundled `UDreamSettingsTextPreparation` covers the page while its actual text geometry requests
-are pending. It listens to language changes, page activation, details/benchmark/reset prompts and
-`OnRowsPresented`. Replacing a category or regrouping its rows therefore prepares newly introduced
-glyphs before exposing the first interactive frame. Selecting the same unchanged category does not
-restart preparation. The component waits for bindings/layout and font uploads without blocking the
-game thread; `PreparingText` disables editing and navigation restores focus when the page is ready.
-
-Keep this behaviour and a font-independent cover in custom themes. Programmatic callers that select
-a category and then edit controls or open details should wait for `ActionsEnabled`, just as player
-input does. Direct session operations remain independent of presentation readiness.
+The bundled `UDreamSettingsTextPreparation` prepares first-open text before revealing the page.
+Ordinary category and language changes then remain visible and interactive. Native culture
+and text-revision events queue background preparation so live translations can update without
+an opaque flash. Hosts that instantiate new fonts per category can retain the older blocking
+policy with `bPrewarmCategories=false`. Programmatic callers must still wait for the initial
+`PreparingText` flag to clear before editing settings.
 
 ### Menu shortcuts
 
@@ -662,11 +660,11 @@ pages do. The confirmation's captions are prepared before its cover retires.
 
 ## Font preparation and category changes
 
-The bundled pages attach `UDreamSettingsTextPreparation`. On first open and culture changes it prepares the visible catalogue's labels, values, options, descriptions and input-group text using the page's real typography. It runs DreamGUI's layout and paint pipeline into temporary geometry, including small-text coverage glyphs, and waits for asynchronous glyph work and upload frames before releasing the initial cover. It does not change the selected category or settings values while preparing.
+The bundled pages attach `UDreamSettingsTextPreparation`. On first open it prepares the visible catalogue's labels, values, options, descriptions and input-group text using the page's real typography. It runs DreamGUI's layout and paint pipeline into temporary geometry, including small-text coverage glyphs, and waits for asynchronous glyph work and upload frames before releasing the initial cover. It does not change the selected category or settings values while preparing.
 
 Once prepared, ordinary category changes remain interactive and do not show the full-page loading cover. Details and confirmation panels still prepare newly presented content through their existing events.
 
-Custom pages should keep typography templates available in their widget tree. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` on the preparation component to retain per-category preparation until those fonts can be prepared in advance. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.
+Custom pages should keep typography templates available in their widget tree. Language changes retain the visible page; their text/font revision work runs in the background. The initial pass also prepares the installed plugin translations listed by `SupportedCultures` with each real typography style. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` on the preparation component to retain per-category preparation until those fonts can be prepared in advance. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.
 
 ## Default screen and editor preview
 

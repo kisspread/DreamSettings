@@ -48,8 +48,6 @@ private:
         float Delay=0,
         float Duration=0.18f,
         float StartOpacity=0.72f,
-        FVector StartScale=FVector::OneVector,
-        TOptional<FVector2D> StartPivot={},
         UMaterialInstanceDynamic* RevealMaterial=nullptr);
     void RevealRows(float BaseDelay=0);
     UDreamWidget* Find(FName Name) const;
@@ -57,14 +55,11 @@ private:
     {
         TWeakObjectPtr<UDreamWidget> Widget;
         FVector2D OriginalOffset,Offset;
-        FVector OriginalScale,StartScale;
-        FVector2D OriginalPivot,StartPivot;
         TWeakObjectPtr<UMaterialInstanceDynamic> Material;
         float OriginalOpacity=1;
         float StartOpacity=1;
         float Duration=0.18f;
         double Started=0;
-        bool bScale=false,bPivot=false;
     };
     struct FSurface
     {
@@ -85,6 +80,5 @@ private:
     TWeakObjectPtr<UDreamNiagaraSystem> Particles;
     FName Category;
     float MotionTime=0,Pulse=0;
-    uint64 RefreshRowsAfter=0,RowRevealAfter=0;
-    bool bOpened=false,bSuppressed=true,bHaveBackground=false,bRowRevealPending=false;
+    bool bOpened=false,bSuppressed=true,bHaveBackground=false;
 };

@@ -1,0 +1,16 @@
+#pragma material(Domain = UI, BlendMode = Translucent, ShadingModel = Unlit, Backend = Graph)
+/// @asset /DreamGUI/Materials/MF_DreamUI_Shade
+extern float4 DreamUIShade(float4 Tint);
+/// @custom
+float MoteShape(float2 UV)
+{
+    float2 P=(UV-0.5)*2.0;
+    float R=dot(P,P);
+    return saturate(exp(-R*15.0)*0.8+exp(-R*3.5)*0.13)*(1.0-smoothstep(0.7,1.0,R));
+}
+export void M_SettingsMote(inout material m)
+{
+    float4 Shaded=DreamUIShade(float4(0.32,0.72,0.9,MoteShape(UE.TexCoord(Index=0))));
+    m.EmissiveColor=Shaded.rgb;
+    m.Opacity=Shaded.a;
+}

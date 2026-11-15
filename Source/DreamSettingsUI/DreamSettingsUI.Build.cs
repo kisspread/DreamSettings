@@ -6,6 +6,6 @@ public class DreamSettingsUI : ModuleRules
     {
         PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
         PublicDependencyModuleNames.AddRange(new[] { "Core", "CoreUObject", "Engine", "InputCore", "DreamSettings", "DreamGUI", "DreamGUIControls", "DreamGUIInput", "FieldNotification" });
-        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore", "DreamGUIRenderer", "Projects" });
+        PrivateDependencyModuleNames.AddRange(new[] { "Slate", "SlateCore", "DreamGUIRenderer", "DreamGUINiagara", "Projects" });
     }
 }

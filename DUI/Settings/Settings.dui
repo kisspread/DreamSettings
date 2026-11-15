@@ -36,7 +36,16 @@ Widget Root : Fill {
     + /Script/DreamSettingsUI.DreamSettingsNavigationScope { InitialFocusName = "CategoryButton"; bRequestedActive = true; bRememberPageFocus = true }
     + /Script/DreamSettingsUI.DreamSettingsTextPreparation { CoverName = "TextPreparationCover" }
     + /Script/DreamSettingsUI.DreamSettingsMotionPolicy {}
+    + /Script/DreamSettingsUI.DreamSettingsAtmosphere { ParticleMaterial = /DreamSettings/UI/M_SettingsMote.M_SettingsMote }
     Image Background { RenderOpacity <- Settings.BackgroundOpacity; Brush.ResourceObject = /DreamSettings/UI/M_SettingsBackdrop.M_SettingsBackdrop; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+    NiagaraSystem AmbientMotes {
+        System = /DreamSettings/UI/NS_SettingsMotes.NS_SettingsMotes
+        bAutoActivate = false
+        bTickWhenGamePaused = true
+        bRaycastTarget = false
+        RenderOpacity = 0
+        @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill }
+    }
     Image SceneContrast { Shown <- Settings.ScenePreviewActive; Brush.TintColor = #080D1699; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
     VerticalBox Page {
         bIsEnabled <- Settings.PageEnabled
@@ -62,7 +71,7 @@ Widget Root : Fill {
             Widget NavigationSurface {
                 + Overlay {}
                 @slot { Size = (204, 0); VerticalAlignment = Fill }
-                Image NavigationPlate { Brush.TintColor = #0D1925; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                Image NavigationPlate { Brush.ResourceObject = /DreamSettings/UI/M_SettingsSurface.M_SettingsSurface; bRaycastTarget = false; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
                 Native.ScrollBox CategoryRail {
                     StyleSource = Inline
                     bRestrictNavigationArea = true
@@ -132,7 +141,7 @@ Widget Root : Fill {
                             + Overlay {}
                             + /Script/DreamSettingsUI.DreamSettingsFocusAnchor { SettingId <- Row.NavigationId }
                             @slot { HorizontalAlignment = Fill; Padding = (0, 0, 10, 8) }
-                            Image RowPlate { Brush.TintColor = @Surface; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
+                            Image RowPlate { Brush.ResourceObject = /DreamSettings/UI/M_SettingsSurface.M_SettingsSurface; bRaycastTarget = false; @slot { HorizontalAlignment = Fill; VerticalAlignment = Fill } }
                             VerticalBox RowContent {
                                 Spacing = 4
                                 Padding = (16, 8, 16, 8)

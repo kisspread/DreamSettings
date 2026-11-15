@@ -9,8 +9,12 @@ uniform float4 AccentColour = float4(0.015, 0.12, 0.16, 1.0);
 uniform float LightStrength = 0.35;
 /// @group Appearance @sort 40 @slider 0 0.1 @desc Subtle technical grid strength
 uniform float GridStrength = 0.012;
+/// @group Motion @sort 50 @desc Controlled by the page so reduced motion can freeze it
+uniform float MotionTime = 0.0;
+/// @group Motion @sort 60 @slider 0 1 @desc Short restrained response to a category change
+uniform float CategoryPulse = 0.0;
 /// @custom
-float3 SettingsBackdrop(float2 UV, float3 Base, float3 Accent, float Strength, float Grid)
+float3 SettingsBackdrop(float2 UV, float3 Base, float3 Accent, float Strength, float Grid, float Clock, float Pulse)
 {
     float2 Size = 1.0 / max(fwidth(UV), float2(0.0001, 0.0001));
     float2 P = UV * Size / max(Size.y, 1.0);
@@ -20,11 +24,23 @@ float3 SettingsBackdrop(float2 UV, float3 Base, float3 Accent, float Strength, f
     float2 Pixel = fwidth(P * 18.0);
     float Line = 1.0 - smoothstep(0.0, max(Pixel.x, Pixel.y), min(Cell.x, Cell.y));
     float BorderGlow = exp(-abs(UV.x + UV.y * 0.3 - 0.92) * 55.0);
-    return Base + Accent * (Glow * Strength + Line * Grid * Glow + BorderGlow * Strength * 0.1);
+    float Drift = Clock * 0.065;
+    float RibbonY = 0.26 + 0.095 * sin(UV.x * 4.5 + Drift) + UV.x * 0.12;
+    float Ribbon = exp(-pow((UV.y - RibbonY) * 8.0, 2.0));
+    float Thread = exp(-abs(UV.y - RibbonY - 0.018) * 280.0);
+    float2 OrbitP = (UV - float2(0.88,0.06)) * float2(Size.x / max(Size.y,1.0),1.0);
+    float Radius = length(OrbitP);
+    float Orbit = exp(-abs(Radius - 0.43 - 0.012 * sin(Drift)) * 550.0);
+    float Orbit2 = exp(-abs(Radius - 0.51) * 650.0);
+    float Edge = smoothstep(0.45,1.0,UV.x) * (1.0-smoothstep(0.0,0.65,UV.y));
+    float BlueGlow = exp(-dot((UV-float2(0.12,0.95))*float2(1.6,2.0),(UV-float2(0.12,0.95))*float2(1.6,2.0))*3.0);
+    return Base + Accent * (Glow * Strength + Line * Grid * Glow + BorderGlow * Strength * 0.1
+        + Ribbon * 0.15 + Thread * 0.055 + (Orbit + Orbit2 * 0.4) * Edge * (0.28 + Pulse * 0.18))
+        + float3(0.012,0.018,0.075) * BlueGlow;
 }
 export void M_SettingsBackdrop(inout material m)
 {
-    float3 Colour = SettingsBackdrop(UE.TexCoord(Index = 0), BaseColour.rgb, AccentColour.rgb, LightStrength, GridStrength);
+    float3 Colour = SettingsBackdrop(UE.TexCoord(Index = 0), BaseColour.rgb, AccentColour.rgb, LightStrength, GridStrength, MotionTime, CategoryPulse);
     float4 Shaded = DreamUIShade(float4(Colour, BaseColour.a));
     m.EmissiveColor = Shaded.rgb;
     m.Opacity = Shaded.a;

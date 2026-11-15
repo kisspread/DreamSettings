@@ -1,0 +1,46 @@
+System(Name="UI/NS_SettingsMotes", Root="Plugin.DreamSettings")
+{
+    Settings = {
+        WarmupTime = 4.0;
+        FixedBounds = box(-720,-20,-450,720,20,450);
+    }
+    Emitter Motes
+    {
+        Settings = {
+            SimTarget = CPU;
+            LocalSpace = true;
+            Determinism = true;
+            RandomSeed = 831;
+            AllocationMode = Fixed;
+            PreAllocationCount = 64;
+        }
+        EmitterUpdate = {
+            EmitterState(LifeCycleMode=Self, LoopBehavior=Infinite);
+            SpawnRate(SpawnRate=2.5);
+        }
+        ParticleSpawn = {
+            Spawn/Initialization/V2/InitializeParticle(
+                LifetimeMode=Random, LifetimeMin=8.0, LifetimeMax=12.0,
+                ColorMode=RandomRange, ColorMinimum=(0.55,0.8,1.0,0.2), ColorMaximum=(0.8,1.0,1.0,0.45),
+                SpriteSizeMode=RandomUniform, UniformSpriteSizeMin=4.0, UniformSpriteSizeMax=15.0
+            );
+            BoxLocation(BoxSize=(1280,2,680), BoxOffset=(0,0,0));
+            AddVelocity(VelocityMode=Linear, Velocity=(4,0,7));
+        }
+        ParticleUpdate = {
+            ParticleState();
+            SolveForcesAndVelocity();
+            Color Particles.Color = hlsl {
+                float4(Particles.Color.rgb,0.42*saturate(Particles.NormalizedAge*5.0)*saturate((1.0-Particles.NormalizedAge)*4.0))
+            };
+        }
+        SpriteRenderer Light
+        {
+            Material = "/Niagara/DefaultAssets/DefaultSpriteMaterial";
+            Alignment = Unaligned;
+            FacingMode = FaceCamera;
+            Bind SpriteSize -> Particles.SpriteSize;
+            Bind Color -> Particles.Color;
+        }
+    }
+}

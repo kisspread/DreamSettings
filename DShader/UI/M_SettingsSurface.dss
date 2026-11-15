@@ -3,12 +3,16 @@
 extern float4 DreamUIShade(float4 Tint);
 /// @group Appearance @slider 0 1
 uniform float FocusAmount = 0.0;
+/// @group Motion
+uniform float RevealProgress = 1.0;
+/// @group Motion
+uniform float RevealStrength = 0.0;
 /// @group Appearance
 uniform float4 BaseColour = float4(0.007,0.014,0.024,1.0);
 /// @group Appearance
 uniform float4 AccentColour = float4(0.12,0.55,0.62,1.0);
 /// @custom
-float4 SettingsSurface(float2 UV, float Focus, float3 Base, float3 Accent)
+float4 SettingsSurface(float2 UV, float Focus, float RevealT, float RevealAmount, float3 Base, float3 Accent)
 {
     float2 Size = 1.0/max(fwidth(UV),float2(0.0001,0.0001));
     float2 Half = Size*0.5;
@@ -18,12 +22,18 @@ float4 SettingsSurface(float2 UV, float Focus, float3 Base, float3 Accent)
     float Border = smoothstep(-2.2,-0.6,Distance)*Mask;
     float Light = exp(-UV.x*4.0)*(0.7+0.3*(1.0-UV.y));
     float Rail = (1.0-smoothstep(3.0,4.5,UV.x*Size.x))*Focus;
-    float3 Colour = Base*(1.0+0.18*(1.0-UV.y)) + Accent*(Focus*Light*0.075+Border*(0.018+0.12*Focus)+Rail*0.45);
+    float SweepX = lerp(-0.12,1.12,RevealT);
+    float Sweep = exp(-pow((UV.x-SweepX)*18.0,2.0));
+    float Edge = exp(-abs(UV.x-SweepX)*90.0);
+    float RevealLight = (Sweep*0.075+Edge*0.2)*RevealAmount;
+    float3 Colour = Base*(1.0+0.18*(1.0-UV.y))
+        + Accent*(Focus*Light*0.075+Border*(0.018+0.12*Focus)+Rail*0.45+RevealLight);
     return float4(Colour,Mask);
 }
 export void M_SettingsSurface(inout material m)
 {
-    float4 Shaded=DreamUIShade(SettingsSurface(UE.TexCoord(Index=0),FocusAmount,BaseColour.rgb,AccentColour.rgb));
+    float4 Shaded=DreamUIShade(SettingsSurface(
+        UE.TexCoord(Index=0),FocusAmount,RevealProgress,RevealStrength,BaseColour.rgb,AccentColour.rgb));
     m.EmissiveColor=Shaded.rgb;
     m.Opacity=Shaded.a;
 }

@@ -70,22 +70,78 @@ bool UDreamSettingsAtmosphere::TryBind()
 void UDreamSettingsAtmosphere::OnEnable()
 { Super::OnEnable(); Release(); bOpened=false; MotionTime=0; SetCanExecuteTick(true); TryBind(); }
 
-void UDreamSettingsAtmosphere::Reveal(UDreamWidget* Node,FVector2D Offset,float Delay)
+void UDreamSettingsAtmosphere::Reveal(
+    UDreamWidget* Node,
+    FVector2D Offset,
+    float Delay,
+    float Duration,
+    float StartOpacity,
+    FVector StartScale,
+    TOptional<FVector2D> StartPivot,
+    UMaterialInstanceDynamic* RevealMaterial)
 {
     if (!Node || !bTransitions || bSuppressed) return;
     FReveal Entry;
-    Entry.Widget=Node; Entry.OriginalOffset=Node->GetRenderOffset(); Entry.Offset=Offset;
-    Entry.OriginalOpacity=Node->GetRenderOpacity(); Entry.Started=FPlatformTime::Seconds()+Delay;
+    Entry.Widget=Node;
+    Entry.OriginalOffset=Node->GetRenderOffset();
+    Entry.OriginalOpacity=Node->GetRenderOpacity();
+    Entry.OriginalScale=Node->GetRenderScale();
+    Entry.OriginalPivot=Node->GetRenderTransformPivot();
+    Entry.Offset=Offset;
+    Entry.StartOpacity=FMath::Clamp(StartOpacity,0.f,1.f);
+    Entry.StartScale=StartScale;
+    Entry.Duration=FMath::Max(Duration,0.01f);
+    Entry.bScale=!StartScale.Equals(FVector::OneVector);
+    Entry.bPivot=StartPivot.IsSet();
+    Entry.StartPivot=StartPivot.IsSet() ? StartPivot.GetValue() : Entry.OriginalPivot;
+    Entry.Material=RevealMaterial;
+    Entry.Started=FPlatformTime::Seconds()+Delay;
     Node->SetRenderOffset(Entry.OriginalOffset+Offset);
-    Node->SetRenderOpacity(Entry.OriginalOpacity*0.72f);
+    Node->SetRenderOpacity(Entry.OriginalOpacity*Entry.StartOpacity);
+    if (Entry.bScale) Node->SetRenderScale(Entry.StartScale);
+    if (Entry.bPivot) Node->SetRenderTransformPivot(Entry.StartPivot);
+    if (Entry.Material.IsValid())
+    {
+        Entry.Material->SetScalarParameterValue(TEXT("RevealProgress"),0);
+        Entry.Material->SetScalarParameterValue(TEXT("RevealStrength"),1);
+    }
     Reveals.Add(Entry);
+}
+
+void UDreamSettingsAtmosphere::RevealRows(float BaseDelay)
+{
+    // The plate closes in from the right while its content catches up from the left. The stagger is
+    // capped so even the long key-binding pages finish as one short gesture instead of a slow cascade.
+    for (int32 Index=0;Index<Surfaces.Num();++Index)
+    {
+        auto* Row=Surfaces[Index].Widget.Get();
+        if (!Row || !Row->GetWidgetActiveInHierarchy()) continue;
+        const float Delay=BaseDelay+FMath::Min(Index,8)*0.014f;
+        Reveal(Row,FVector2D(22,-1),Delay,0.16f,0.64f,
+            FVector(0.98,0.96,1),FVector2D(0,0.5));
+        if (auto* Content=Row->FindChildByDisplayName(TEXT("RowContent"),true))
+            Reveal(Content,FVector2D(-14,0),Delay+0.006f,0.14f,0.58f);
+        if (auto* Plate=Surfaces[Index].Image.IsValid() ? Surfaces[Index].Image->GetWidget() : nullptr)
+            Reveal(Plate,FVector2D(28,0),Delay,0.12f,0.85f,
+                FVector(0.90,1,1),FVector2D(1,0.5),Surfaces[Index].Material.Get());
+    }
 }
 
 void UDreamSettingsAtmosphere::Settle()
 {
     for (const auto& Entry:Reveals) if (Entry.Widget.IsValid())
-    { Entry.Widget->SetRenderOffset(Entry.OriginalOffset); Entry.Widget->SetRenderOpacity(Entry.OriginalOpacity); }
-    Reveals.Reset(); Pulse=0;
+    {
+        Entry.Widget->SetRenderOffset(Entry.OriginalOffset);
+        Entry.Widget->SetRenderOpacity(Entry.OriginalOpacity);
+        Entry.Widget->SetRenderScale(Entry.OriginalScale);
+        if (Entry.bPivot) Entry.Widget->SetRenderTransformPivot(Entry.OriginalPivot);
+        if (Entry.Material.IsValid())
+        {
+            Entry.Material->SetScalarParameterValue(TEXT("RevealProgress"),1);
+            Entry.Material->SetScalarParameterValue(TEXT("RevealStrength"),0);
+        }
+    }
+    Reveals.Reset(); bRowRevealPending=false; RowRevealAfter=0; Pulse=0;
     if (BackgroundMaterial) BackgroundMaterial->SetScalarParameterValue(TEXT("CategoryPulse"),0);
 }
 
@@ -101,7 +157,10 @@ void UDreamSettingsAtmosphere::ReducedChanged(bool Reduced)
 }
 
 void UDreamSettingsAtmosphere::RowsPresented()
-{ RefreshRowsAfter=GFrameCounter+1; }
+{
+    RefreshRowsAfter=GFrameCounter+1;
+    if (bRowRevealPending) RowRevealAfter=RefreshRowsAfter;
+}
 
 void UDreamSettingsAtmosphere::RefreshRows()
 {
@@ -147,7 +206,7 @@ void UDreamSettingsAtmosphere::Tick(float DeltaTime)
     {
         MotionTime+=Dt*FMath::Max(MotionRate,0.f);
         BackgroundMaterial->SetScalarParameterValue(TEXT("MotionTime"),MotionTime);
-        Pulse=FMath::Max(0.f,Pulse-Dt*2.2f);
+        Pulse=FMath::Max(0.f,Pulse-Dt*3.6f);
         BackgroundMaterial->SetScalarParameterValue(TEXT("CategoryPulse"),Pulse);
     }
     if (Particles.IsValid())
@@ -164,32 +223,59 @@ void UDreamSettingsAtmosphere::Tick(float DeltaTime)
     if (!bOpened && !VM->PreparingText)
     {
         bOpened=true; Category=VM->GetCurrentCategory(); RefreshRows();
-        Reveal(Find(TEXT("Header")),FVector2D(0,10));
-        Reveal(Find(TEXT("NavigationSurface")),FVector2D(-10,0),0.035f);
-        Reveal(Find(ContentName),FVector2D(0,-10),0.065f);
-        Reveal(Find(TEXT("Actions")),FVector2D(0,-6),0.09f);
+        Reveal(Find(TEXT("Header")),FVector2D(0,8),0,0.16f,0.68f);
+        Reveal(Find(TEXT("NavigationSurface")),FVector2D(-8,0),0.025f,0.16f,0.68f);
+        Reveal(Find(ContentName),FVector2D(0,-8),0.04f,0.16f,0.65f);
+        Reveal(Find(TEXT("Actions")),FVector2D(0,-4),0.065f,0.15f,0.75f);
+        RevealRows(0.075f);
     }
     if (Category!=VM->GetCurrentCategory())
     {
-        Settle(); Category=VM->GetCurrentCategory(); RefreshRows();
+        Settle(); Category=VM->GetCurrentCategory();
+        bRowRevealPending=true; RowRevealAfter=GFrameCounter+1;
         if (!bSuppressed)
         {
             Pulse=1;
-            Reveal(Find(TEXT("CategoryHeading")),FVector2D(8,0));
-            for (int32 Index=0;Index<Surfaces.Num();++Index)
-                Reveal(Surfaces[Index].Widget.Get(),FVector2D(0,-7),FMath::Min(Index,5)*0.018f);
+            Reveal(Find(TEXT("CategoryHeading")),FVector2D(10,0),0,0.16f,0.66f);
+            Reveal(Find(ContentName),FVector2D(0,-6),0.012f,0.16f,0.78f);
         }
+    }
+    if (bRowRevealPending && Surfaces.Num()>0 && GFrameCounter>=RowRevealAfter)
+    {
+        bRowRevealPending=false;
+        RevealRows();
     }
     const double Now=FPlatformTime::Seconds();
     for (int32 Index=Reveals.Num()-1;Index>=0;--Index)
     {
         auto& Entry=Reveals[Index];
         if (!Entry.Widget.IsValid()) { Reveals.RemoveAtSwap(Index); continue; }
-        const float T=FMath::Clamp(float((Now-Entry.Started)/0.30),0.f,1.f);
+        const float T=FMath::Clamp(float((Now-Entry.Started)/Entry.Duration),0.f,1.f);
         const float Remaining=FMath::Pow(1.f-T,3.f);
         Entry.Widget->SetRenderOffset(Entry.OriginalOffset+Entry.Offset*Remaining);
-        Entry.Widget->SetRenderOpacity(Entry.OriginalOpacity*(1.f-0.28f*Remaining));
-        if (T>=1) Reveals.RemoveAtSwap(Index);
+        Entry.Widget->SetRenderOpacity(
+            Entry.OriginalOpacity*FMath::Lerp(1.f,Entry.StartOpacity,Remaining));
+        if (Entry.bScale)
+            Entry.Widget->SetRenderScale(
+                Entry.OriginalScale+(Entry.StartScale-Entry.OriginalScale)*Remaining);
+        if (Entry.Material.IsValid())
+        {
+            Entry.Material->SetScalarParameterValue(TEXT("RevealProgress"),T);
+            Entry.Material->SetScalarParameterValue(TEXT("RevealStrength"),Remaining);
+        }
+        if (T>=1)
+        {
+            Entry.Widget->SetRenderOffset(Entry.OriginalOffset);
+            Entry.Widget->SetRenderOpacity(Entry.OriginalOpacity);
+            Entry.Widget->SetRenderScale(Entry.OriginalScale);
+            if (Entry.bPivot) Entry.Widget->SetRenderTransformPivot(Entry.OriginalPivot);
+            if (Entry.Material.IsValid())
+            {
+                Entry.Material->SetScalarParameterValue(TEXT("RevealProgress"),1);
+                Entry.Material->SetScalarParameterValue(TEXT("RevealStrength"),0);
+            }
+            Reveals.RemoveAtSwap(Index);
+        }
     }
     auto* Input=UDreamUIInputServices::Get(this);
     auto* Scope=GetWidget()->GetComponent<UDreamSettingsNavigationScope>();
@@ -217,7 +303,8 @@ void UDreamSettingsAtmosphere::Release()
         && Surface.Image->GetBrush().GetResourceObject()==Surface.Material.Get()) Surface.Image->SetBrush(Surface.Original);
     Reveals.Reset(); Surfaces.Reset(); SurfaceMaterials.Reset(); BackgroundMaterial=nullptr;
     Background.Reset(); Particles.Reset(); Presenter.Reset(); Preferences.Reset();
-    OriginalBackground=FDreamUIImageBrush(); bHaveBackground=false; bOpened=false; bSuppressed=true; RefreshRowsAfter=0;
+    OriginalBackground=FDreamUIImageBrush(); bHaveBackground=false; bOpened=false; bSuppressed=true;
+    RefreshRowsAfter=RowRevealAfter=0; bRowRevealPending=false;
     SetCanExecuteTick(false);
 }
 void UDreamSettingsAtmosphere::OnDisable() { Release(); Super::OnDisable(); }

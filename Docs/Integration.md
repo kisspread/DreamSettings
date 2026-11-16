@@ -57,6 +57,56 @@ existing layouts can keep their original Previous/Next controls without changes.
 This API adds no dependency on a menu plugin. WarUI's host adapter maps it to the
 separate DreamMenusUI dropdown; other projects may use any DreamGUI presentation.
 
+For a checkbox inside a DUI `for Row` block, bind `bIsOn <- Row.ToggleValue` and route
+`OnToggleChanged += Row.SetToggle`. This follows the same session staging and refresh
+path as the existing scalar/stepper controls, including Revert and disabled states.
+
+For a scalar slider, keep its native range at 0..1 and bind `Value <- Row.NormalizedNumber`,
+`StepSize <- Row.NormalizedStep`, and `OnValueChanged += Row.SetNormalizedNumber`.
+The row converts back to the definition's actual range and session step grid. This avoids
+an initial value above 1 being clamped and staged before dynamic min/max bindings arrive.
+`Number`, `Minimum`, `Maximum` and `SetNumber` remain available for numeric/stepper controls.
+
+### A small authored page
+
+A host can show selected rows from several catalogue categories as a single page:
+
+```cpp
+Presenter->ConfigureSinglePage(LOCTEXT("VideoPage", "Video options"), {
+    TEXT("Display.Gamma"), TEXT("Display.WindowMode"),
+    TEXT("Display.Resolution"), TEXT("Display.VSync")
+});
+Presenter->Initialize(LocalPlayer);
+```
+
+Configure this before `Initialize`. IDs determine row order; duplicates are removed,
+an unknown ID fails initialization, and catalogue-hidden definitions remain hidden.
+The presenter exposes one synthetic category, `HostPage`, with the supplied title.
+`ResetCurrentCategory` stages defaults only for this page's selected rows.
+The session's `ResetSettings(Ids)` performs that subset reset atomically, including
+preview-capable definitions, without applying or persisting them. Unavailable rows are
+skipped; an unknown ID or rejected default leaves the entire draft unchanged.
+
+This is a presentation projection. The underlying registry and session retain their
+ordinary capabilities and transaction rules. Another consumer can still open the full
+catalogue. Do not hide built-in settings globally merely to create a smaller example UI.
+An empty ID list restores the ordinary category presentation. Calling
+`ConfigureVisibleCategories` replaces the single-page projection, and vice versa;
+configuration is frozen while a session is open.
+
+### Host settings with startup restoration
+
+Use `UDreamSettingsSubsystem::RegisterSetting(Definition, Provider)` before opening a
+session to add a synchronous host backend. It validates a candidate catalogue, restores
+that ID's saved value when the provider is available, and checks the effective readback
+before publishing the registration. A failed restore attempts compensation and reports
+rollback failure explicitly. Duplicate/invalid definitions, asynchronous startup writes
+and registration during a session are rejected.
+
+Providers still own real native reads/writes and availability; the subsystem owns
+persistence. Unavailable hardware may leave a registered row disabled with its reason.
+The API adds no dependency on this project's menu, legacy game labels or CVars.
+
 ### Categories and catalogue overrides
 
 Tabs are registry data, not UI strings. `RegisterCategory` adds a tab with its own localized label,

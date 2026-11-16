@@ -32,6 +32,8 @@ bool FDreamSettingsNumericEntryTest::RunTest(const FString&)
     auto S=MakeShared<FDreamSettingsSession>(Registry,Store); TestTrue(TEXT("Numeric session opens"),S->Open().IsOk());
     TStrongObjectPtr<UDreamSettingRowViewModel> Row(NewObject<UDreamSettingRowViewModel>());
     Row->Initialize(S,TEXT("Test.Number"));
+    Row->SetToggle(true);
+    TestEqual(TEXT("Hidden checkbox binding cannot edit a scalar row"),Native.FindChecked(TEXT("Test.Number")).Number,2.2);
     Row->CommitNumberText(TEXT(" 2.23 "));
     TestTrue(TEXT("Typed value uses the definition step grid"),FMath::IsNearlyEqual(Native.FindChecked(TEXT("Test.Number")).Number,2.25,1.e-6));
     TestEqual(TEXT("Canonical input reflects normalization"),Row->NumericText,FString(TEXT("2.25")));
@@ -42,6 +44,8 @@ bool FDreamSettingsNumericEntryTest::RunTest(const FString&)
         TestFalse(TEXT("Rejected entry explains why"),Row->Description.IsEmpty());
         TestEqual(TEXT("Rejected input restores canonical text"),Row->NumericText,FString(TEXT("2.25")));
     }
+    Row->SetNormalizedNumber(1.f); TestEqual(TEXT("Fixed-range slider reaches native maximum above one"),Native.FindChecked(TEXT("Test.Number")).Number,3.5);
+    Row->SetNormalizedNumber(0.f); TestEqual(TEXT("Fixed-range slider reaches native nonzero minimum"),Native.FindChecked(TEXT("Test.Number")).Number,.4);
     Row->CommitNumberText(TEXT("３．５")); TestEqual(TEXT("Full-width IME decimal accepted"),Native.FindChecked(TEXT("Test.Number")).Number,3.5);
     Row->Initialize(S,TEXT("Audio.MasterVolume"));
     TestEqual(TEXT("Audio input uses percent units"),Row->NumericText,FString(TEXT("100%")));

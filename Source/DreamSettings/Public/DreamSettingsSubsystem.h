@@ -27,6 +27,8 @@ public:
 	 */
 	FDreamSettingsResult ApplyCatalogOverride(const FDreamSettingsCatalogOverride& Override);
 	FDreamSettingsResult RegisterCategory(FDreamSettingCategory Category);
+    /** Register a synchronous host backend before a session opens; restore its persisted value once. */
+    FDreamSettingsResult RegisterSetting(FDreamSettingDefinition Definition, TSharedPtr<IDreamSettingProvider> Provider);
 	const FDreamSettingsResult& GetInitializationResult() const { return InitializationResult; }
 	FDreamSettingsResult RecommendGraphics(FDreamSettingsSession& Session);
 	void SetGameBenchmark(ULocalPlayer* Player,TSharedPtr<IDreamSettingsGameBenchmark> Launcher);

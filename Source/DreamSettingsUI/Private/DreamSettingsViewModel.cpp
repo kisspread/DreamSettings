@@ -83,6 +83,7 @@ void UDreamSettingRowViewModel::Refresh()
     DREAM_VM_SET(IsChoice, D->Kind == EDreamSettingKind::Choice);
     DREAM_VM_SET(IsStepper, D->Kind == EDreamSettingKind::Toggle || IsScalar);
     DREAM_VM_SET(IsToggle, D->Kind == EDreamSettingKind::Toggle);
+    DREAM_VM_SET(ToggleValue, IsToggle && Value.Number != 0);
     DREAM_VM_SET(IsDiscrete,!IsKey && !IsScalar);
     const auto* Family=S->GetPending().Find(TEXT("Input.GamepadIcons"));
     DREAM_VM_SET(IconFamily,Family && Family->bToken ? Family->Token : FString(TEXT("xbox")));
@@ -107,6 +108,9 @@ void UDreamSettingRowViewModel::Refresh()
     DREAM_VM_SET(Maximum, static_cast<float>(D->Max));
     DREAM_VM_SET(Step, static_cast<float>(D->Step));
     DREAM_VM_SET(Number, static_cast<float>(Value.Number));
+    const double Span = D->Max-D->Min;
+    DREAM_VM_SET(NormalizedNumber, Span > 0 ? static_cast<float>(FMath::Clamp((Value.Number-D->Min)/Span,0.,1.)) : 0.f);
+    DREAM_VM_SET(NormalizedStep, Span > 0 ? static_cast<float>(D->Step/Span) : 0.f);
     FNumberFormattingOptions InputFormat;
     InputFormat.SetUseGrouping(false).SetMaximumFractionalDigits(6);
     const double DisplayScale=NumberDisplayScale();
@@ -181,6 +185,15 @@ void UDreamSettingRowViewModel::SetNumber(float Value)
         NumericError=FText::GetEmpty();
         if (!S->Stage(Id, Value).IsOk()) BroadcastFieldValueChanged(ThisClass::FFieldNotificationClassDescriptor::Number);
     }
+}
+void UDreamSettingRowViewModel::SetNormalizedNumber(float Value)
+{
+    const auto S = Session.Pin();
+    if (!Enabled || !IsScalar || !S || !FMath::IsFinite(Value)) return;
+    const auto* Definition = S->GetRegistry().Find(Id);
+    NumericError=FText::GetEmpty();
+    const double NumberValue = Definition->Min+(Definition->Max-Definition->Min)*FMath::Clamp(Value,0.f,1.f);
+    if (!S->Stage(Id, NumberValue).IsOk()) BroadcastFieldValueChanged(ThisClass::FFieldNotificationClassDescriptor::NormalizedNumber);
 }
 double UDreamSettingRowViewModel::NumberDisplayScale() const
 {
@@ -290,6 +303,17 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 	TArray<FName> Order;
 	Session->GetRegistry().Validate(Order);
 	Order.Sort([&](FName A, FName B) { return Session->GetRegistry().Find(A)->Order < Session->GetRegistry().Find(B)->Order; });
+    if (!SinglePageSettings.IsEmpty())
+    {
+        for (FName Id : SinglePageSettings)
+            if (!Session->GetRegistry().Find(Id))
+            {
+                Shutdown();
+                DREAM_VM_SET(Status, LOCTEXT("PageSettingMissing", "A setting required by this page is unavailable."));
+                return false;
+            }
+        Order = SinglePageSettings;
+    }
 	TArray<TObjectPtr<UDreamSettingsCategoryViewModel>> NewCategories;
 	for (FName Id : Order)
 	{
@@ -304,6 +328,13 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 		C->Id=Category.Id; C->Owner=this; C->Label=ResolveCategoryLabel(Category);
 		NewCategories.Add(C);
 	}
+    if (!SinglePageSettings.IsEmpty())
+    {
+        NewCategories.Reset();
+        auto* Page = NewObject<UDreamSettingsCategoryViewModel>(this);
+        Page->Id = TEXT("HostPage"); Page->Owner = this; Page->Label = SinglePageTitle;
+        NewCategories.Add(Page);
+    }
 	// A host that restricts the page keeps only its categories, in the host's order, after dropping empty ones.
 	if (!VisibleCategories.IsEmpty())
 	{
@@ -355,6 +386,7 @@ void UDreamSettingsViewModel::Shutdown()
 
 FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
 {
+    if (!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage")) return SinglePageTitle;
     if (Session)
         for (const auto& Known : Session->GetRegistry().Categories())
             if (Known.Id == Category) return ResolveCategoryLabel(Known);
@@ -363,6 +395,7 @@ FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
 
 EDreamSettingCategoryContent UDreamSettingsViewModel::CategoryContent(FName Category) const
 {
+    if (!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage")) return EDreamSettingCategoryContent::None;
     if (Session)
         for (const auto& Known : Session->GetRegistry().Categories())
             if (Known.Id == Category) return Known.Content;
@@ -371,8 +404,20 @@ EDreamSettingCategoryContent UDreamSettingsViewModel::CategoryContent(FName Cate
 
 void UDreamSettingsViewModel::ConfigureVisibleCategories(const TArray<FName>& InCategories, FName InInitialCategory)
 {
+    if (Session) return;
+    SinglePageSettings.Reset();
+    SinglePageTitle = FText::GetEmpty();
     VisibleCategories = InCategories;
     InitialCategory = InInitialCategory;
+}
+void UDreamSettingsViewModel::ConfigureSinglePage(const FText& Title, const TArray<FName>& SettingIds)
+{
+    if (Session) return;
+    VisibleCategories.Reset();
+    InitialCategory = NAME_None;
+    SinglePageSettings.Reset();
+    for (const FName Id : SettingIds) SinglePageSettings.AddUnique(Id);
+    SinglePageTitle = Title;
 }
 
 void UDreamSettingsViewModel::SelectCategory(FName Category)
@@ -384,7 +429,9 @@ void UDreamSettingsViewModel::SelectCategory(FName Category)
     for (const auto& Item:Categories) Item->SetSelected(Item->Id==Category);
     if (NavigationMemory.IsValid()) NavigationMemory->Category=Category;
     TArray<TObjectPtr<UDreamSettingRowViewModel>> Selected;
-    for (auto Row : AllRows) if (Session->GetRegistry().Find(Row->GetSettingId())->Category == Category) Selected.Add(Row);
+    for (auto Row : AllRows)
+        if ((!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage"))
+            || Session->GetRegistry().Find(Row->GetSettingId())->Category == Category) Selected.Add(Row);
     GroupInputRows(Selected);
     const bool NewText=Rows!=Selected || bInputGroupingDirty; bInputGroupingDirty=false;
     DREAM_VM_SET(Rows, Selected);
@@ -610,13 +657,20 @@ void UDreamSettingsViewModel::ConfirmResetSelected()
 void UDreamSettingsViewModel::ConfirmResetCategory()
 {
     if (!ConfirmReset || PreparingText || !Session || Session->IsBusy()) return;
-    const FName Category=CurrentCategory; CancelResetOptions(); Session->ResetCategory(Category);
+    const FName Category=CurrentCategory; CancelResetOptions();
+    if (SinglePageSettings.IsEmpty()) Session->ResetCategory(Category);
+    else ResetCurrentCategory();
 }
 void UDreamSettingsViewModel::SetMasterVolume(float Value) { if (Session && ActionsEnabled) Session->Stage(DreamSettingIds::MasterVolume, Value); }
 void UDreamSettingsViewModel::Apply() { if (Session && ActionsEnabled) Session->Apply(); }
 void UDreamSettingsViewModel::Revert() { if (Session && ActionsEnabled) Session->Revert(); }
 void UDreamSettingsViewModel::ResetDefaults() { if (Session && ActionsEnabled) Session->Reset(); }
-void UDreamSettingsViewModel::ResetCurrentCategory() { if (Session && ActionsEnabled) Session->ResetCategory(CurrentCategory); }
+void UDreamSettingsViewModel::ResetCurrentCategory()
+{
+    if (!Session || !ActionsEnabled) return;
+    if (SinglePageSettings.IsEmpty()) { Session->ResetCategory(CurrentCategory); return; }
+    Session->ResetSettings(SinglePageSettings);
+}
 void UDreamSettingsViewModel::RequestClose()
 {
 	if (ConfirmReset) { CancelResetOptions(); return; }

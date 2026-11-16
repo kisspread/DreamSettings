@@ -231,6 +231,8 @@ public:
 	FDreamSettingsResult Reset();
 	/** Stage defaults for one category atomically; unrelated drafts and persisted values are preserved. */
 	FDreamSettingsResult ResetCategory(FName Category);
+	/** Stage defaults for an authored subset, including preview settings, without applying them. */
+	FDreamSettingsResult ResetSettings(const TArray<FName>& SettingIds);
 	FDreamSettingsResult Close();
 	bool IsDirty() const;
 	bool IsOpen() const { return bOpen; }
@@ -244,7 +246,7 @@ public:
 	DECLARE_MULTICAST_DELEGATE(FChanged);
 	FChanged OnChanged;
 private:
-	FDreamSettingsResult ResetDefaultsInCategory(FName Category);
+	FDreamSettingsResult ResetDefaultsInCategory(FName Category, const TArray<FName>* SettingIds = nullptr);
 	FDreamSettingsResult Publish(FDreamSettingsResult Result);
 	FDreamSettingsResult Restore(const FDreamSettingsValues& Values);
 	FDreamSettingsResult StartRestore(bool bDiscardDraft, FDreamSettingsResult ResultAfter = {});

@@ -120,4 +120,30 @@ bool FDreamSettingsCategoryResetAvailabilityTest::RunTest(const FString&)
     TestEqual(TEXT("Reset and retry never save"),Store->Saves,0);
     return true;
 }
+IMPLEMENT_SIMPLE_AUTOMATION_TEST(FDreamSettingsAuthoredResetTest,"DreamSettings.Core.AuthoredPageReset",EAutomationTestFlags::EditorContext|EAutomationTestFlags::ClientContext|EAutomationTestFlags::EngineFilter)
+bool FDreamSettingsAuthoredResetTest::RunTest(const FString&)
+{
+    auto Registry=MakeShared<FDreamSettingsRegistry>(); auto Store=MakeShared<FCategoryStore>();
+    FDreamSettingsValues Values;
+    for (FName Id : {FName(TEXT("Preview")),FName(TEXT("Deferred")),FName(TEXT("Other"))})
+    {
+        Values.Add(Id,.3);
+        FDreamSettingDefinition D; D.Id=Id; D.Default=.8; D.bPreview=Id==TEXT("Preview");
+        Registry->Register(D,CategoryProvider(Values,Id));
+    }
+    FDreamSettingsSession Session(Registry,Store);
+    TestTrue(TEXT("Authored reset fixture opens"),Session.Open().IsOk());
+    TestTrue(TEXT("Outside draft stages"),Session.Stage(TEXT("Other"),.6).IsOk());
+    TestTrue(TEXT("Mixed preview and deferred subset resets"),Session.ResetSettings({TEXT("Preview"),TEXT("Deferred")}).IsOk());
+    TestEqual(TEXT("Preview default stays deferred until Apply"),Values.FindChecked(TEXT("Preview")).Number,.3);
+    TestEqual(TEXT("Preview default in draft"),Session.GetPending().FindChecked(TEXT("Preview")).Number,.8);
+    TestEqual(TEXT("Deferred default in draft"),Session.GetPending().FindChecked(TEXT("Deferred")).Number,.8);
+    TestEqual(TEXT("Outside draft preserved"),Session.GetPending().FindChecked(TEXT("Other")).Number,.6);
+    const auto Snapshot=Session.GetPending();
+    TestFalse(TEXT("Unknown ID rejects subset"),Session.ResetSettings({TEXT("Other"),TEXT("Missing")}).IsOk());
+    TestTrue(TEXT("Rejection leaves outside draft intact"),Session.GetPending().FindChecked(TEXT("Other")).Equals(Snapshot.FindChecked(TEXT("Other"))));
+    TestTrue(TEXT("Authored reset can revert"),Session.Revert().IsOk());
+    TestEqual(TEXT("Reset never persists"),Store->Saves,0);
+    return true;
+}
 #endif

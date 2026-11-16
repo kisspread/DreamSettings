@@ -28,6 +28,9 @@ public:
     FText GetValidationMessage() const { return NumericError; }
     UPROPERTY(BlueprintReadOnly,FieldNotify,Category="Settings") FName NavigationId;
     UFUNCTION(BlueprintCallable, Category="Settings") void SetNumber(float Value);
+    /** Fixed 0..1 control range avoids ordering-dependent range/value binding callbacks. */
+    UFUNCTION(BlueprintCallable, Category="Settings") void SetNormalizedNumber(float Value);
+    UFUNCTION(BlueprintCallable, Category="Settings") void SetToggle(bool Value) { if (IsToggle) SetNumber(Value ? 1.f : 0.f); }
     UFUNCTION(BlueprintCallable, Category="Settings") void CommitNumberText(const FString& Text);
     UFUNCTION(BlueprintCallable, Category="Settings") void Previous();
     UFUNCTION(BlueprintCallable, Category="Settings") void Next();
@@ -47,6 +50,7 @@ public:
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsChoice = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsStepper = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsToggle = false;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool ToggleValue = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FKey SelectedKey;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FString IconFamily;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool HasAudioSample = false;
@@ -70,6 +74,8 @@ public:
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool Enabled = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsScalar = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float Number = 0;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float NormalizedNumber = 0;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float NormalizedStep = 0.01f;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float Minimum = 0;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float Maximum = 1;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") float Step = 0.01f;
@@ -132,6 +138,8 @@ public:
     void ConfigureMenuShortcuts(const FDreamSettingsMenuShortcuts& Value);
     /** Restrict the tabs to these categories, in this order. Empty shows every registry category. */
     void ConfigureVisibleCategories(const TArray<FName>& Categories,FName InitialCategory);
+    /** Project a small authored page across catalogue categories. Call before Initialize. */
+    void ConfigureSinglePage(const FText& Title, const TArray<FName>& SettingIds);
     bool HandleMenuShortcut(FKey Key,bool Repeat);
     UFUNCTION(BlueprintCallable,Category="Settings") void RequestResetOptions();
     UFUNCTION(BlueprintCallable,Category="Settings") void CancelResetOptions();
@@ -216,6 +224,8 @@ private:
 	TMap<FSoftObjectPath,FText> InputContextLabels;
 	bool bInputGroupingDirty=false;
 	TArray<FName> VisibleCategories;
+    TArray<FName> SinglePageSettings;
+    FText SinglePageTitle;
 	FName InitialCategory;
 	FText CategoryPresentation(FName Category) const;
 	EDreamSettingCategoryContent CategoryContent(FName Category) const;

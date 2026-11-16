@@ -156,11 +156,9 @@ Widget Root : Fill {
                                         StyleSource = Inline
                                         Shown <- Row.IsScalar
                                         bIsEnabled <- Row.Enabled
-                                        MinValue <- Row.Minimum
-                                        MaxValue <- Row.Maximum
-                                        StepSize <- Row.Step
-                                        Value <- Row.Number
-                                        OnValueChanged += Row.SetNumber
+                                        StepSize <- Row.NormalizedStep
+                                        Value <- Row.NormalizedNumber
+                                        OnValueChanged += Row.SetNormalizedNumber
                                         @slot Size = (180, 42)
                                     }
                                     SettingStepButton Previous : SmallAction { Shown <- Row.IsOrdinary; bIsEnabled <- Row.Enabled; RepeatEnabled <- Row.IsScalar; OnStep += Row.Previous(); Text { Text = "<" } }

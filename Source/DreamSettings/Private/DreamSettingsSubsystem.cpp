@@ -264,6 +264,53 @@ TSharedPtr<FDreamSettingsSession> UDreamSettingsSubsystem::OpenSession(ULocalPla
 	return Session;
 }
 
+FDreamSettingsResult UDreamSettingsSubsystem::RegisterSetting(FDreamSettingDefinition Definition, TSharedPtr<IDreamSettingProvider> Provider)
+{
+    check(IsInGameThread());
+    InitializeSettings();
+    if (!InitializationResult.IsOk()) return InitializationResult;
+    if (ActiveSession) return FDreamSettingsResult::Fail(EDreamSettingsError::Conflict,
+        LOCTEXT("RegisterWhileOpen", "Close the settings page before registering a backend."));
+    if (Definition.bAsyncWrite) return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
+        LOCTEXT("RegisterAsyncBackend", "Startup registration requires a synchronous host backend."));
+    auto Candidate = MakeShared<FDreamSettingsRegistry>(*Registry);
+    const FName Id = Definition.Id;
+    auto Result = Candidate->Register(MoveTemp(Definition),Provider);
+    if (!Result.IsOk()) return Result;
+    TArray<FName> Ordered;
+    Result = Candidate->Validate(Ordered);
+    if (!Result.IsOk()) return Result;
+    FDreamSettingsValues Saved;
+    Result = Store->Load(Saved);
+    if (!Result.IsOk()) return Result;
+    if (const auto* Value = Saved.Find(Id); Value && Provider && Provider->Availability().IsOk())
+    {
+        FDreamSettingValue Normalized;
+        Result = Candidate->Find(Id)->Normalize(*Value,Normalized);
+        if (!Result.IsOk()) return Result;
+        FDreamSettingValue Before;
+        Result = Provider->Read(Before);
+        if (!Result.IsOk()) return Result;
+        Result = Provider->Write(Normalized);
+        FDreamSettingValue Actual;
+        if (Result.IsOk()) Result = Provider->Read(Actual);
+        if (Result.IsOk() && !Actual.Equals(Normalized)) Result = FDreamSettingsResult::Fail(EDreamSettingsError::Backend,
+            LOCTEXT("HostSettingRejected", "The host did not accept its saved setting."));
+        if (!Result.IsOk())
+        {
+            auto Rollback = Provider->Write(Before);
+            FDreamSettingValue Restored;
+            if (Rollback.IsOk()) Rollback = Provider->Read(Restored);
+            if (!Rollback.IsOk() || !Restored.Equals(Before))
+                return FDreamSettingsResult::Fail(EDreamSettingsError::Rollback,
+                    LOCTEXT("HostSettingRollbackFailed", "The host setting could not be restored after startup failed."));
+            return Result;
+        }
+    }
+    Registry = MoveTemp(Candidate);
+    return {};
+}
+
 FDreamSettingsResult UDreamSettingsSubsystem::AttachGameplayAdapter(ULocalPlayer* Player,UObject* Adapter)
 {
 	InitializeSettings();

@@ -182,7 +182,7 @@ FDreamSettingsResult ApplyDreamSettingsCatalogOverride(FDreamSettingsRegistry& R
     for (const auto& Pair : Override.CategoryLabels)
         if (Pair.Value.IsEmpty() || !Existing.ContainsByPredicate([&](const auto& C) { return C.Id == Pair.Key; }))
             return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
-                FText::Format(LOCTEXT("OverrideCategory", "Cannot relabel unknown category {0}."), FText::FromName(Pair.Key)));
+                FText::Format(LOCTEXT("OverrideCategoryLabel", "Cannot relabel unknown category {0}."), FText::FromName(Pair.Key)));
     for (const auto& Pair : Override.CategoryOrder)
         if (!Existing.ContainsByPredicate([&](const auto& C) { return C.Id == Pair.Key; }))
             return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidDefinition,
@@ -701,7 +701,13 @@ FDreamSettingsResult FDreamSettingsSession::ResetCategory(FName Category)
         return Publish(FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ResetUnavailable", "Defaults cannot be restored right now.")));
     return ResetDefaultsInCategory(Category);
 }
-FDreamSettingsResult FDreamSettingsSession::ResetDefaultsInCategory(FName Category)
+FDreamSettingsResult FDreamSettingsSession::ResetSettings(const TArray<FName>& SettingIds)
+{
+    for (FName Id : SettingIds)
+        if (!Registry->Find(Id)) return Publish(FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ResetUnavailable", "Defaults cannot be restored right now.")));
+    return ResetDefaultsInCategory(NAME_None,&SettingIds);
+}
+FDreamSettingsResult FDreamSettingsSession::ResetDefaultsInCategory(FName Category, const TArray<FName>* SettingIds)
 {
     if (!bOpen || IsBusy() || bAwaitingConfirmation) return Publish(FDreamSettingsResult::Fail(EDreamSettingsError::Conflict, LOCTEXT("ResetUnavailable", "Defaults cannot be restored right now.")));
     FDreamSettingsValues Candidate=Pending;
@@ -709,13 +715,14 @@ FDreamSettingsResult FDreamSettingsSession::ResetDefaultsInCategory(FName Catego
     for (FName Id:Order)
     {
         const auto* Definition=Registry->Find(Id);
-        if ((Category.IsNone() || Definition->Category==Category) && !Definition->Derive && Availability(Id,false).IsOk())
+        const bool bSelected = SettingIds ? SettingIds->Contains(Id) : Category.IsNone() || Definition->Category==Category;
+        if (bSelected && !Definition->Derive && Availability(Id,false).IsOk())
         { Candidate.Add(Id,Definition->Default); ToReset.Add(Id); }
     }
     for (FName Id:Order)
     {
         const auto* Definition=Registry->Find(Id);
-        const bool ValidateReset=ToReset.Contains(Id) || (Category.IsNone() && Definition->Kind==EDreamSettingKind::Key);
+        const bool ValidateReset=ToReset.Contains(Id) || (!SettingIds && Category.IsNone() && Definition->Kind==EDreamSettingKind::Key);
         if (ValidateReset && Candidate.FindChecked(Id).bToken && Definition->OptionAvailability)
         {
             const auto Result=Definition->OptionAvailability(Candidate.FindChecked(Id).Token,Candidate);

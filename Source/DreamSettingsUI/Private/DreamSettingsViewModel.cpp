@@ -80,6 +80,9 @@ void UDreamSettingRowViewModel::Refresh()
     DREAM_VM_SET(IsScalar, D->Kind == EDreamSettingKind::Scalar);
     DREAM_VM_SET(IsKey, D->Kind == EDreamSettingKind::Key);
     DREAM_VM_SET(IsOrdinary,!IsKey);
+    DREAM_VM_SET(IsChoice, D->Kind == EDreamSettingKind::Choice);
+    DREAM_VM_SET(IsStepper, D->Kind == EDreamSettingKind::Toggle || IsScalar);
+    DREAM_VM_SET(IsToggle, D->Kind == EDreamSettingKind::Toggle);
     DREAM_VM_SET(IsDiscrete,!IsKey && !IsScalar);
     const auto* Family=S->GetPending().Find(TEXT("Input.GamepadIcons"));
     DREAM_VM_SET(IconFamily,Family && Family->bToken ? Family->Token : FString(TEXT("xbox")));
@@ -125,6 +128,51 @@ void UDreamSettingRowViewModel::Refresh()
     DREAM_VM_SET(ValueText, Text);
     DREAM_VM_SET(DefaultValueText,DefaultLabel(*D,NumberDisplayScale()==100));
     DREAM_VM_SET(ResetHint,FText::Format(LOCTEXT("ResetSettingHint","Reset this setting to {0}."),DefaultValueText));
+    OnPresentationChanged.Broadcast();
+}
+TArray<FDreamSettingOption> UDreamSettingRowViewModel::GetChoiceOptions() const
+{
+    if (const auto S = Session.Pin())
+        if (const auto* Definition = S->GetRegistry().Find(Id); Definition && Definition->Kind == EDreamSettingKind::Choice)
+            return Definition->GetOptions();
+    return {};
+}
+FString UDreamSettingRowViewModel::GetChoiceId() const
+{
+    if (const auto S = Session.Pin())
+        if (const auto* Current = S->GetPending().Find(Id); Current && Current->bToken) return Current->Token;
+    return {};
+}
+FDreamSettingsResult UDreamSettingRowViewModel::ChoiceAvailability(const FString& ChoiceId) const
+{
+    const auto S = Session.Pin();
+    if (!S || !S->IsOpen())
+        return FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ChoiceSessionClosed", "The settings session is closed."));
+    const auto* Definition = S->GetRegistry().Find(Id);
+    if (!Definition || Definition->Kind != EDreamSettingKind::Choice)
+        return FDreamSettingsResult::Fail(EDreamSettingsError::InvalidValue, LOCTEXT("NotAChoice", "This setting does not contain choices."));
+    const auto Options = Definition->GetOptions();
+    const auto* Option = Options.FindByPredicate([&ChoiceId](const auto& Item) { return Item.Id == ChoiceId; });
+    if (!Option || !Option->bSelectable)
+        return FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ChoiceNotSelectable", "This option cannot be selected."));
+    const auto Available = S->Availability(Id);
+    if (!Available.IsOk()) return Available;
+    if (Definition->OptionAvailability) return Definition->OptionAvailability(ChoiceId, S->GetPending());
+    return {};
+}
+FDreamSettingsResult UDreamSettingRowViewModel::SelectChoice(const FString& ChoiceId)
+{
+    const auto Available = ChoiceAvailability(ChoiceId);
+    if (!Available.IsOk()) return Available;
+    if (!Enabled)
+        return FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ChoiceEditingBlocked", "Finish the current operation before changing this setting."));
+    const auto S = Session.Pin();
+    if (!S) return FDreamSettingsResult::Fail(EDreamSettingsError::Unavailable, LOCTEXT("ChoiceSessionClosed", "The settings session is closed."));
+    if (GetChoiceId() == ChoiceId) return {};
+    NumericError = FText::GetEmpty();
+    const auto Result = S->Stage(Id, FDreamSettingValue::Id(ChoiceId));
+    if (!Result.IsOk()) Refresh();
+    return Result;
 }
 void UDreamSettingRowViewModel::SetNumber(float Value)
 {

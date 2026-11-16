@@ -41,6 +41,22 @@ previous input mode and focus instead of copying that controller verbatim.
 
 ## Settings contracts
 
+### Choice controls in custom layouts
+
+`UDreamSettingRowViewModel` exposes `GetChoiceOptions`, `GetChoiceId`,
+`ChoiceAvailability` and `SelectChoice` for a custom dropdown. Pass the stable option ID
+to `SelectChoice`; translated labels and display indices are not identities. Availability
+is checked again at submission, and the existing session owns staging, validation,
+preview and persistence. A display-only choice such as Custom cannot be submitted.
+
+`OnPresentationChanged` fires after a complete row refresh, so a custom control can update
+its option list, selected ID and enabled state together. Unsubscribe when releasing or
+rebinding the control. `IsChoice`, `IsStepper` and `IsToggle` are presentation hints;
+existing layouts can keep their original Previous/Next controls without changes.
+
+This API adds no dependency on a menu plugin. WarUI's host adapter maps it to the
+separate DreamMenusUI dropdown; other projects may use any DreamGUI presentation.
+
 ### Categories and catalogue overrides
 
 Tabs are registry data, not UI strings. `RegisterCategory` adds a tab with its own localized label,

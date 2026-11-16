@@ -31,6 +31,12 @@ public:
     UFUNCTION(BlueprintCallable, Category="Settings") void CommitNumberText(const FString& Text);
     UFUNCTION(BlueprintCallable, Category="Settings") void Previous();
     UFUNCTION(BlueprintCallable, Category="Settings") void Next();
+    /** Choice IDs retain identity across localization, reordering and device-list refreshes. */
+    TArray<FDreamSettingOption> GetChoiceOptions() const;
+    FDreamSettingsResult ChoiceAvailability(const FString& ChoiceId) const;
+    FString GetChoiceId() const;
+    FDreamSettingsResult SelectChoice(const FString& ChoiceId);
+    TMulticastDelegate<void()> OnPresentationChanged;
     UFUNCTION(BlueprintCallable, Category="Settings") void Reset();
     UFUNCTION(BlueprintCallable, Category="Settings") void PlaySample();
     UFUNCTION(BlueprintCallable, Category="Settings") void SetKey(FKey Value);
@@ -38,6 +44,9 @@ public:
     UFUNCTION(BlueprintCallable, Category="Settings") void ClearKey();
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsKey = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsOrdinary = true;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsChoice = false;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsStepper = false;
+    UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool IsToggle = false;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FKey SelectedKey;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") FString IconFamily;
     UPROPERTY(BlueprintReadOnly, FieldNotify, Category="Settings") bool HasAudioSample = false;

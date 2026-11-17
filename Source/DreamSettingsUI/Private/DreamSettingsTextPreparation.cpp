@@ -10,6 +10,7 @@
 #include "Core/DreamUIGeometry.h"
 #include "Internationalization/TextTransformer.h"
 #include "Internationalization/Internationalization.h"
+#include "Internationalization/Culture.h"
 #include "Internationalization/TextLocalizationManager.h"
 #include "Internationalization/TextLocalizationResource.h"
 #include "Interfaces/IPluginManager.h"
@@ -62,7 +63,13 @@ void UDreamSettingsTextPreparation::OnEnable()
         Presenter->OnBenchmarkConfirmationOpened.AddUObject(this,&ThisClass::BeginPreparation);
         Presenter->OnResetConfirmationOpened.AddUObject(this,&ThisClass::BeginPreparation);
     }
-    BeginCataloguePreparation();
+    if (bHasPresented && PreparedRevision==FTextLocalizationManager::Get().GetTextRevision()
+        && PreparedLanguage==FInternationalization::Get().GetCurrentLanguage()->GetName())
+    {
+        StartedFrame=GFrameCounter; QuietFrame=0; bWarmCatalogue=false;
+        SetCanExecuteTick(true);
+    }
+    else BeginCataloguePreparation();
 }
 void UDreamSettingsTextPreparation::BeginCataloguePreparation()
 {
@@ -77,40 +84,60 @@ void UDreamSettingsTextPreparation::RowsPresented()
 {
     if (!bPrewarmCategories || (!bHasPresented && !bCatalogueReady)) BeginPreparation();
 }
+void UDreamSettingsTextPreparation::SetAdditionalTextRoots(const TArray<UDreamWidget*>& Roots)
+{
+    AdditionalTextRoots.Reset();
+    for (auto* Root : Roots) if (Root) AdditionalTextRoots.Add(Root);
+}
 void UDreamSettingsTextPreparation::WarmCatalogue()
 {
     auto* VM=FindPresenter();
     if (!VM || !GetWidget()) return;
-    FString Content=VM->GetCataloguePreparationText();
-    TArray<FString> StaticTexts;
+    TArray<FText> SourceTexts=VM->GetCataloguePreparationTexts();
+    SourceTexts.Append(AdditionalTexts);
     TFunction<void(UDreamWidget*)> CollectStaticTexts=[&](UDreamWidget* Node)
     {
         if (!Node) return;
-        if (const auto* Text=Cast<UDreamText>(Node->GetVisual())) StaticTexts.AddUnique(Text->GetText().ToString());
+        if (const auto* Text=Cast<UDreamText>(Node->GetVisual())) SourceTexts.Add(Text->GetText());
         for (auto* Child:Node->GetChildren()) CollectStaticTexts(Child);
     };
     CollectStaticTexts(GetWidget());
-    Content+=TEXT("\n")+FString::Join(StaticTexts,TEXT("\n"));
+    for (const auto& Root : AdditionalTextRoots) CollectStaticTexts(Root.Get());
+    TArray<FString> CurrentTexts;
+    TSet<FTextId> TextIds;
+    for (const auto& Text : SourceTexts)
+    {
+        CurrentTexts.AddUnique(Text.ToString());
+        if (const auto* Source=FTextInspector::GetSourceString(Text)) CurrentTexts.AddUnique(*Source);
+        const auto Namespace=FTextInspector::GetNamespace(Text),Key=FTextInspector::GetKey(Text);
+        if (Namespace.IsSet() && Key.IsSet()) TextIds.Add(FTextId(FTextKey(*Namespace.GetValue()),FTextKey(*Key.GetValue())));
+    }
     TMap<FString,FString> LanguageTexts;
-    LanguageTexts.Add(FString(),Content);
+    LanguageTexts.Add(FString(),FString::Join(CurrentTexts,TEXT("\n")));
     if (!bHasPresented)
     {
         // Read resources without switching the process culture or publishing text
         // revisions. Prepare the installed built-in languages before the first
         // page is revealed, including strings not on the current category.
-        if (const auto Plugin=IPluginManager::Get().FindPlugin(TEXT("DreamSettings")))
+        TArray<FString> ResourceRoots=FPaths::GetGameLocalizationPaths();
+        if (const auto Plugin=IPluginManager::Get().FindPlugin(TEXT("DreamSettings"))) ResourceRoots.AddUnique(Plugin->GetContentDir()/TEXT("Localization/DreamSettings"));
+        for (const auto& Language:GetDefault<UDreamSettingsConfiguration>()->SupportedCultures)
         {
-            for (const auto& Language:GetDefault<UDreamSettingsConfiguration>()->SupportedCultures)
+            TArray<FString> Strings=CurrentTexts;
+            for (const auto& ResourceRoot : ResourceRoots)
             {
-                const FString Path=Plugin->GetContentDir()/TEXT("Localization/DreamSettings")/Language/TEXT("DreamSettings.locres");
-                if (!IFileManager::Get().FileExists(*Path)) continue;
-                FTextLocalizationResource Resource;
-                if (!Resource.LoadFromFile(Path,0)) continue;
-                TArray<FString> Strings;
-                for (const auto& Entry:Resource.Entries)
-                    if (Entry.Value.LocalizedString) Strings.AddUnique(*Entry.Value.LocalizedString);
-                LanguageTexts.Add(Language,FString::Join(Strings,TEXT("\n")));
+                TArray<FString> Files;
+                const FString Folder=ResourceRoot/Language;
+                IFileManager::Get().FindFiles(Files,*(Folder/TEXT("*.locres")),true,false);
+                for (const auto& File : Files)
+                {
+                    FTextLocalizationResource Resource;
+                    if (!Resource.LoadFromFile(Folder/File,0)) continue;
+                    for (const auto& Id : TextIds)
+                        if (const auto* Entry=Resource.Entries.Find(Id); Entry && Entry->LocalizedString) Strings.AddUnique(*Entry->LocalizedString);
+                }
             }
+            LanguageTexts.Add(Language,FString::Join(Strings,TEXT("\n")));
         }
     }
     TArray<TPair<FString,FString>> TextBatches;
@@ -164,6 +191,7 @@ void UDreamSettingsTextPreparation::WarmCatalogue()
         for (auto* Child:Node->GetChildren()) Visit(Child);
     };
     Visit(GetWidget());
+    for (const auto& Root : AdditionalTextRoots) Visit(Root.Get());
     CatalogueFonts.Reset();
     for (auto* Font:Fonts) CatalogueFonts.Add(Font);
     bWarmCatalogue=false;
@@ -192,6 +220,8 @@ void UDreamSettingsTextPreparation::Tick(float DeltaTime)
     if (GFrameCounter<QuietFrame+2) return;
     bCatalogueReady=bPrewarmCategories;
     bHasPresented=true;
+    PreparedRevision=FTextLocalizationManager::Get().GetTextRevision();
+    PreparedLanguage=FInternationalization::Get().GetCurrentLanguage()->GetName();
     Release();
 }
 void UDreamSettingsTextPreparation::Release()

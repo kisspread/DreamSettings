@@ -303,16 +303,30 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 	TArray<FName> Order;
 	Session->GetRegistry().Validate(Order);
 	Order.Sort([&](FName A, FName B) { return Session->GetRegistry().Find(A)->Order < Session->GetRegistry().Find(B)->Order; });
-    if (!SinglePageSettings.IsEmpty())
+    if (!AuthoredPages.IsEmpty())
     {
-        for (FName Id : SinglePageSettings)
-            if (!Session->GetRegistry().Find(Id))
+        Order.Reset();
+        TSet<FName> PageIds;
+        for (const auto& Page : AuthoredPages)
+        {
+            if (Page.Id.IsNone() || Page.Title.IsEmpty() || PageIds.Contains(Page.Id))
             {
                 Shutdown();
                 DREAM_VM_SET(Status, LOCTEXT("PageSettingMissing", "A setting required by this page is unavailable."));
                 return false;
             }
-        Order = SinglePageSettings;
+            PageIds.Add(Page.Id);
+            for (FName Id : Page.SettingIds)
+            {
+                if (!Session->GetRegistry().Find(Id))
+                {
+                    Shutdown();
+                    DREAM_VM_SET(Status, LOCTEXT("PageSettingMissing", "A setting required by this page is unavailable."));
+                    return false;
+                }
+                Order.AddUnique(Id);
+            }
+        }
     }
 	TArray<TObjectPtr<UDreamSettingsCategoryViewModel>> NewCategories;
 	for (FName Id : Order)
@@ -328,12 +342,15 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 		C->Id=Category.Id; C->Owner=this; C->Label=ResolveCategoryLabel(Category);
 		NewCategories.Add(C);
 	}
-    if (!SinglePageSettings.IsEmpty())
+    if (!AuthoredPages.IsEmpty())
     {
         NewCategories.Reset();
-        auto* Page = NewObject<UDreamSettingsCategoryViewModel>(this);
-        Page->Id = TEXT("HostPage"); Page->Owner = this; Page->Label = SinglePageTitle;
-        NewCategories.Add(Page);
+        for (const auto& Definition : AuthoredPages)
+        {
+            auto* Page = NewObject<UDreamSettingsCategoryViewModel>(this);
+            Page->Id = Definition.Id; Page->Owner = this; Page->Label = Definition.Title;
+            NewCategories.Add(Page);
+        }
     }
 	// A host that restricts the page keeps only its categories, in the host's order, after dropping empty ones.
 	if (!VisibleCategories.IsEmpty())
@@ -348,7 +365,7 @@ bool UDreamSettingsViewModel::Initialize(ULocalPlayer* Player)
 	// A restricted page opens at the host's chosen tab; a full page may resume the player's last visit.
 	const FName Home = NewCategories.ContainsByPredicate([&](const auto& C){ return C->Id==InitialCategory; })
 		? InitialCategory : (NewCategories.IsEmpty() ? NAME_None : NewCategories[0]->Id);
-	const FName Previous = NavigationMemory.IsValid() && VisibleCategories.IsEmpty() ? NavigationMemory->Category : Home;
+	const FName Previous = NavigationMemory.IsValid() && VisibleCategories.IsEmpty() && AuthoredPages.IsEmpty() ? NavigationMemory->Category : Home;
 	SelectCategory(Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Previous; }) ? Previous : Home);
 	Refresh();
 	return true;
@@ -386,7 +403,7 @@ void UDreamSettingsViewModel::Shutdown()
 
 FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
 {
-    if (!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage")) return SinglePageTitle;
+    if (const auto* Page=AuthoredPages.FindByPredicate([Category](const auto& P){ return P.Id==Category; })) return Page->Title;
     if (Session)
         for (const auto& Known : Session->GetRegistry().Categories())
             if (Known.Id == Category) return ResolveCategoryLabel(Known);
@@ -395,7 +412,7 @@ FText UDreamSettingsViewModel::CategoryPresentation(FName Category) const
 
 EDreamSettingCategoryContent UDreamSettingsViewModel::CategoryContent(FName Category) const
 {
-    if (!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage")) return EDreamSettingCategoryContent::None;
+    if (AuthoredPages.ContainsByPredicate([Category](const auto& P){ return P.Id==Category; })) return EDreamSettingCategoryContent::None;
     if (Session)
         for (const auto& Known : Session->GetRegistry().Categories())
             if (Known.Id == Category) return Known.Content;
@@ -405,19 +422,20 @@ EDreamSettingCategoryContent UDreamSettingsViewModel::CategoryContent(FName Cate
 void UDreamSettingsViewModel::ConfigureVisibleCategories(const TArray<FName>& InCategories, FName InInitialCategory)
 {
     if (Session) return;
-    SinglePageSettings.Reset();
-    SinglePageTitle = FText::GetEmpty();
+    AuthoredPages.Reset();
     VisibleCategories = InCategories;
     InitialCategory = InInitialCategory;
 }
 void UDreamSettingsViewModel::ConfigureSinglePage(const FText& Title, const TArray<FName>& SettingIds)
 {
+    ConfigurePages(SettingIds.IsEmpty() ? TArray<FDreamSettingsPage>{} : TArray<FDreamSettingsPage>{{TEXT("HostPage"),Title,SettingIds}},NAME_None);
+}
+void UDreamSettingsViewModel::ConfigurePages(const TArray<FDreamSettingsPage>& Pages,FName InitialPage)
+{
     if (Session) return;
     VisibleCategories.Reset();
-    InitialCategory = NAME_None;
-    SinglePageSettings.Reset();
-    for (const FName Id : SettingIds) SinglePageSettings.AddUnique(Id);
-    SinglePageTitle = Title;
+    InitialCategory=InitialPage;
+    AuthoredPages=Pages;
 }
 
 void UDreamSettingsViewModel::SelectCategory(FName Category)
@@ -427,11 +445,15 @@ void UDreamSettingsViewModel::SelectCategory(FName Category)
     if (CurrentCategory!=Category) { OnNavigationChanging.Broadcast(); ScenePreviewOverride.Reset(); }
     CurrentCategory=Category;
     for (const auto& Item:Categories) Item->SetSelected(Item->Id==Category);
-    if (NavigationMemory.IsValid()) NavigationMemory->Category=Category;
+	if (NavigationMemory.IsValid() && AuthoredPages.IsEmpty()) NavigationMemory->Category=Category;
     TArray<TObjectPtr<UDreamSettingRowViewModel>> Selected;
-    for (auto Row : AllRows)
-        if ((!SinglePageSettings.IsEmpty() && Category == TEXT("HostPage"))
-            || Session->GetRegistry().Find(Row->GetSettingId())->Category == Category) Selected.Add(Row);
+    if (const auto* Page=AuthoredPages.FindByPredicate([Category](const auto& P){ return P.Id==Category; }))
+    {
+        for (FName Id : Page->SettingIds)
+            if (const auto* Row=AllRows.FindByPredicate([Id](const auto& R){ return R->GetSettingId()==Id; }); Row && !Selected.Contains(*Row)) Selected.Add(*Row);
+    }
+    else for (auto Row : AllRows)
+        if (Session->GetRegistry().Find(Row->GetSettingId())->Category == Category) Selected.Add(Row);
     GroupInputRows(Selected);
     const bool NewText=Rows!=Selected || bInputGroupingDirty; bInputGroupingDirty=false;
     DREAM_VM_SET(Rows, Selected);
@@ -561,17 +583,17 @@ void UDreamSettingsViewModel::GroupInputRows(TArray<TObjectPtr<UDreamSettingRowV
 void UDreamSettingsViewModel::SetPreparingText(bool Value)
 { if (PreparingText!=Value) { DREAM_VM_SET(PreparingText,Value); Refresh(); } }
 
-FString UDreamSettingsViewModel::GetCataloguePreparationText() const
+TArray<FText> UDreamSettingsViewModel::GetCataloguePreparationTexts() const
 {
-    TArray<FString> Texts;
-    auto Add=[&](const FText& Text) { if (!Text.IsEmpty()) Texts.AddUnique(Text.ToString()); };
+    TArray<FText> Texts;
+    auto Add=[&](const FText& Text) { if (!Text.IsEmpty()) Texts.Add(Text); };
     if (!Session) return {};
     for (const auto& Category:Categories) Add(Category->Label);
     Add(LOCTEXT("OtherInputBindings","Other bindings"));
     for (const auto& Row:AllRows)
     {
         const auto* Definition=Session->GetRegistry().Find(Row->GetSettingId());
-        if (!Definition || !Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Definition->Category; })) continue;
+        if (!Definition || (AuthoredPages.IsEmpty() && !Categories.ContainsByPredicate([&](const auto& C){ return C->Id==Definition->Category; }))) continue;
         Add(Definition->Label); Add(Definition->Description); Add(Definition->InputCategoryLabel);
         if (Definition->DynamicDescription) Add(Definition->DynamicDescription(Session->GetPending()));
         Add(Row->Description); Add(Row->ValueText); Add(Row->DefaultValueText); Add(Row->ResetHint);
@@ -584,8 +606,14 @@ FString UDreamSettingsViewModel::GetCataloguePreparationText() const
         }
     }
     // Digits and punctuation used by numeric edits, percentages, and joined input-group labels.
-    Texts.Add(TEXT("0123456789.,+-/%"));
-    return FString::Join(Texts,TEXT("\n"));
+    Texts.Add(FText::AsCultureInvariant(TEXT("0123456789.,+-/%")));
+    return Texts;
+}
+FString UDreamSettingsViewModel::GetCataloguePreparationText() const
+{
+    TArray<FString> Strings;
+    for (const auto& Text : GetCataloguePreparationTexts()) Strings.AddUnique(Text.ToString());
+    return FString::Join(Strings,TEXT("\n"));
 }
 void UDreamSettingsViewModel::ConfigureMenuShortcuts(const FDreamSettingsMenuShortcuts& Value)
 {
@@ -658,7 +686,7 @@ void UDreamSettingsViewModel::ConfirmResetCategory()
 {
     if (!ConfirmReset || PreparingText || !Session || Session->IsBusy()) return;
     const FName Category=CurrentCategory; CancelResetOptions();
-    if (SinglePageSettings.IsEmpty()) Session->ResetCategory(Category);
+    if (AuthoredPages.IsEmpty()) Session->ResetCategory(Category);
     else ResetCurrentCategory();
 }
 void UDreamSettingsViewModel::SetMasterVolume(float Value) { if (Session && ActionsEnabled) Session->Stage(DreamSettingIds::MasterVolume, Value); }
@@ -668,8 +696,8 @@ void UDreamSettingsViewModel::ResetDefaults() { if (Session && ActionsEnabled) S
 void UDreamSettingsViewModel::ResetCurrentCategory()
 {
     if (!Session || !ActionsEnabled) return;
-    if (SinglePageSettings.IsEmpty()) { Session->ResetCategory(CurrentCategory); return; }
-    Session->ResetSettings(SinglePageSettings);
+    if (const auto* Page=AuthoredPages.FindByPredicate([this](const auto& P){ return P.Id==CurrentCategory; })) Session->ResetSettings(Page->SettingIds);
+    else Session->ResetCategory(CurrentCategory);
 }
 void UDreamSettingsViewModel::RequestClose()
 {

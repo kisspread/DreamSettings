@@ -94,6 +94,22 @@ An empty ID list restores the ordinary category presentation. Calling
 `ConfigureVisibleCategories` replaces the single-page projection, and vice versa;
 configuration is frozen while a session is open.
 
+For several small pages sharing a draft, use `ConfigurePages` before initialization:
+
+```cpp
+Presenter->ConfigurePages({
+    {TEXT("Video"), LOCTEXT("Video", "Video"), {TEXT("Display.Gamma"), TEXT("Display.VSync")}},
+    {TEXT("Language"), LOCTEXT("Language", "Language"), {TEXT("Localization.Culture")}}
+}, TEXT("Video"));
+```
+
+Each `FDreamSettingsPage` has a stable ID, localized title and ordered setting IDs.
+`SelectCategory(PageId)` changes the projection while retaining the same session and
+draft. Row IDs can appear on more than one page; a repeated ID within a page appears
+once. Duplicate page IDs and unknown setting IDs reject initialization. Authored page
+navigation does not overwrite the independent full catalogue's last-category memory.
+`ConfigureSinglePage` remains the one-page convenience form.
+
 ### Host settings with startup restoration
 
 Use `UDreamSettingsSubsystem::RegisterSetting(Definition, Provider)` before opening a
@@ -730,7 +746,16 @@ The bundled pages attach `UDreamSettingsTextPreparation`. On first open it prepa
 
 Once prepared, ordinary category changes remain interactive and do not show the full-page loading cover. Details and confirmation panels still prepare newly presented content through their existing events.
 
-Custom pages should keep typography templates available in their widget tree. Language changes retain the visible page; their text/font revision work runs in the background. The initial pass also prepares the installed plugin translations listed by `SupportedCultures` with each real typography style. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` on the preparation component to retain per-category preparation until those fonts can be prepared in advance. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.
+Custom pages should keep typography templates available in their widget tree. Language changes retain the visible page; their text/font revision work runs in the background. The initial pass prepares only the presented catalogue/static text and their translations from the host and plugin localization resources, in each real typography style. It does not rasterize every translation in an installed settings plugin. If a host creates different fonts only when a category opens, set `bPrewarmCategories = false` to retain per-category preparation. Runtime font replacement and arbitrary new external strings are not a promise that every possible glyph is already cached.
+
+A host with a startup loading screen can create its cached settings page there, wait
+for `UDreamSettingsTextPreparation::IsPrepared()` and `PreparingText == false`, then
+release the session and hide the page. Retaining the widget retains its readiness;
+reopening still creates a fresh session. `SetAdditionalTextRoots` and
+`SetAdditionalTexts` let related host pages participate in the first pass. Their text
+is read without changing culture, opening popups or granting them input ownership.
+Re-enabling a prepared page with the same language/text revision checks visible glyph
+uploads without another blocking cover. Changed text revisions still schedule work.
 
 ## Default screen and editor preview
 

@@ -16,6 +16,14 @@ class UDreamSettingsSubtitleViewModel;
 class UDreamSettingsDetails;
 class UDreamSettingsPresentation;
 
+/** A host-authored presentation; its rows still belong to the full session catalogue. */
+struct DREAMSETTINGSUI_API FDreamSettingsPage
+{
+    FName Id;
+    FText Title;
+    TArray<FName> SettingIds;
+};
+
 /** One registry definition, independent of any visual theme. */
 UCLASS()
 class DREAMSETTINGSUI_API UDreamSettingRowViewModel : public UDreamViewModel
@@ -124,6 +132,7 @@ public:
 	void SetPreparingText(bool Value);
 	/** Localized visible catalogue text for asynchronous font preparation; never changes the selected tab. */
 	FString GetCataloguePreparationText() const;
+    TArray<FText> GetCataloguePreparationTexts() const;
 	UPROPERTY(BlueprintReadOnly,FieldNotify,Category="Settings") bool PreparingText=false;
 	UPROPERTY(BlueprintReadOnly,FieldNotify,Category="Settings") TObjectPtr<UDreamSettingsSubtitleViewModel> Subtitles;
 	void PreviewSubtitles();
@@ -140,6 +149,7 @@ public:
     void ConfigureVisibleCategories(const TArray<FName>& Categories,FName InitialCategory);
     /** Project a small authored page across catalogue categories. Call before Initialize. */
     void ConfigureSinglePage(const FText& Title, const TArray<FName>& SettingIds);
+    void ConfigurePages(const TArray<FDreamSettingsPage>& Pages, FName InitialPage);
     bool HandleMenuShortcut(FKey Key,bool Repeat);
     UFUNCTION(BlueprintCallable,Category="Settings") void RequestResetOptions();
     UFUNCTION(BlueprintCallable,Category="Settings") void CancelResetOptions();
@@ -224,8 +234,7 @@ private:
 	TMap<FSoftObjectPath,FText> InputContextLabels;
 	bool bInputGroupingDirty=false;
 	TArray<FName> VisibleCategories;
-    TArray<FName> SinglePageSettings;
-    FText SinglePageTitle;
+    TArray<FDreamSettingsPage> AuthoredPages;
 	FName InitialCategory;
 	FText CategoryPresentation(FName Category) const;
 	EDreamSettingCategoryContent CategoryContent(FName Category) const;
